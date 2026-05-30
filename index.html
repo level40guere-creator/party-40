@@ -29,7 +29,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{overflow-x:hidden;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;background:var(--bg);color:var(--text);min-height:100vh;}
 
 #bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 
@@ -54,7 +54,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   padding:.75rem 1rem;
   display:flex;align-items:center;justify-content:space-between;
 }
-.header-logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-1px;color:var(--accent);text-shadow:0 0 20px var(--glow);}
+.header-logo{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-1.5px;color:var(--accent);text-shadow:0 0 20px var(--glow);}
 .header-icons{display:flex;gap:1rem;align-items:center;}
 .hico{background:none;border:none;color:var(--text);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
 .hico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -96,8 +96,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .post-header{display:flex;align-items:center;padding:.65rem .9rem;gap:.65rem;}
 .post-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;color:#fff;}
 .post-user{flex:1;}
-.post-username{font-size:.85rem;font-weight:700;line-height:1.2;}
-.post-time{font-size:.65rem;color:var(--text2);}
+.post-username{font-size:.95rem;font-weight:800;line-height:1.2;letter-spacing:-.2px;}
+.post-time{font-size:.7rem;color:var(--text2);}
 .post-more{background:none;border:none;color:var(--text2);cursor:pointer;padding:.2rem;font-size:1.1rem;}
 
 /* Post image */
@@ -116,23 +116,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .action-spacer{flex:1;}
 
 /* Post info */
-.post-likes{font-size:.83rem;font-weight:700;padding:0 .9rem .25rem;}
-.post-caption{font-size:.83rem;padding:0 .9rem .3rem;line-height:1.4;}
+.post-likes{font-size:.95rem;font-weight:800;padding:0 .9rem .3rem;}
+.post-caption{font-size:.92rem;padding:0 .9rem .35rem;line-height:1.5;}
 .post-caption strong{font-weight:700;margin-right:.3rem;}
 
 /* Comments */
 .post-comments{padding:0 .9rem;}
-.comment-line{font-size:.8rem;padding:.15rem 0;line-height:1.4;}
+.comment-line{font-size:.88rem;padding:.2rem 0;line-height:1.5;}
 .comment-line strong{font-weight:700;margin-right:.3rem;}
 .comment-line .ctime{font-size:.65rem;color:var(--text2);margin-left:.3rem;}
-.view-comments{font-size:.78rem;color:var(--text2);padding:.15rem 0;cursor:pointer;}
+.view-comments{font-size:.88rem;color:var(--text2);padding:.2rem 0;cursor:pointer;font-weight:600;}
 
 /* Comment input */
 .post-comment-bar{display:flex;align-items:center;padding:.6rem .9rem;gap:.6rem;border-top:1px solid rgba(255,255,255,.05);}
 .comment-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));flex-shrink:0;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:700;}
-.comment-input-ig{flex:1;background:none;border:none;color:var(--text);font-size:.83rem;outline:none;font-family:inherit;}
+.comment-input-ig{flex:1;background:none;border:none;color:var(--text);font-size:.92rem;outline:none;font-family:inherit;}
 .comment-input-ig::placeholder{color:#444;}
-.comment-send-ig{background:none;border:none;color:var(--accent);font-size:.83rem;font-weight:700;cursor:pointer;padding:0;opacity:.5;transition:opacity .2s;}
+.comment-send-ig{background:none;border:none;color:var(--accent);font-size:.92rem;font-weight:800;cursor:pointer;padding:0;opacity:.5;transition:opacity .2s;}
 .comment-send-ig.active{opacity:1;}
 
 /* EMPTY */
