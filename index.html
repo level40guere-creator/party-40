@@ -312,6 +312,15 @@ function animate(){
 window.onload=function(){
   initBeams();initPtcls();initCrowd();animate();
   if(myName){document.getElementById('un').value=myName;var ini=myName[0].toUpperCase();document.getElementById('cmtAvatar').textContent=ini;}
+  function showApp(){
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('appScreen').style.display='block';
+    if(pid)loadFeed();
+  }
+  // Timeout fallback — show app after 4s no matter what
+  var appShown=false;
+  var fallback=setTimeout(function(){if(!appShown){appShown=true;showApp();}},4000);
+
   db.collection('config').doc('party').get().then(function(doc){
     if(doc.exists){
       var d=doc.data();pid=d.partyId||'';
@@ -325,8 +334,10 @@ window.onload=function(){
       document.getElementById('headerLogo').textContent=(d.name||'PARTY FOTOS').toUpperCase();
       document.title=d.name||'Party Fotos';
     }
-    setTimeout(function(){document.getElementById('loadingScreen').style.display='none';document.getElementById('appScreen').style.display='block';if(pid)loadFeed();},900);
-  }).catch(function(){setTimeout(function(){document.getElementById('loadingScreen').style.display='none';document.getElementById('appScreen').style.display='block';},900);});
+    if(!appShown){appShown=true;clearTimeout(fallback);setTimeout(showApp,600);}
+  }).catch(function(){
+    if(!appShown){appShown=true;clearTimeout(fallback);setTimeout(showApp,600);}
+  });
 };
 
 /* UPLOAD */
