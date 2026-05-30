@@ -53,23 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .hico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 /* STORIES ROW — upload bar */
-.stories-row{
-  display:flex;gap:.75rem;padding:.85rem 1rem;
-  overflow-x:auto;border-bottom:1px solid var(--border);
-  background:rgba(7,7,15,.6);
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.stories-row::-webkit-scrollbar{display:none;}
-.story-item{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex-shrink:0;cursor:pointer;}
-.story-ring{
-  width:58px;height:58px;border-radius:50%;
-  background:linear-gradient(45deg,var(--accent),var(--accent2),var(--accent));
-  padding:2.5px;display:flex;align-items:center;justify-content:center;
-}
-.story-ring.add{background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.3);}
-.story-inner{width:100%;height:100%;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;overflow:hidden;}
-.story-label{font-size:.6rem;color:var(--text2);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
 
 /* UPLOAD MODAL */
 #uploadModal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;}
@@ -208,16 +192,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
   </header>
 
-  <!-- STORIES / UPLOAD ROW -->
-  <div class="stories-row">
-    <div class="story-item" onclick="openUpload()">
-      <div class="story-ring add">
-        <div class="story-inner">➕</div>
-      </div>
-      <div class="story-label">Tu foto</div>
-    </div>
-    <div id="storiesContainer"></div>
-  </div>
+
 
   <!-- FEED -->
   <div class="feed" id="feed">
@@ -426,7 +401,6 @@ function loadFeed(){
     .onSnapshot(function(snap){
       media=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
       renderFeed();
-      renderStories();
     });
 }
 
@@ -492,19 +466,7 @@ function renderFeed(){
   });
 }
 
-function renderStories(){
-  var container=document.getElementById('storiesContainer');
-  container.innerHTML='';
-  var seen={};
-  media.forEach(function(item){
-    if(seen[item.uploaderName]) return;
-    seen[item.uploaderName]=true;
-    var div=document.createElement('div');div.className='story-item';
-    div.innerHTML='<div class="story-ring"><div class="story-inner">'+getInitial(item.uploaderName)+'</div></div>'+
-      '<div class="story-label">'+esc(item.uploaderName||'?')+'</div>';
-    container.appendChild(div);
-  });
-}
+
 
 function expandComments(id, el){
   var cb=document.getElementById('cb_'+id);
