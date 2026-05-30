@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Party Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--accent:#b400ff;--glow:rgba(180,0,255,.4);--bg:#07070f;--bg2:#0f0f1a;--bg3:#16162a;--text:#fff;--text2:#aac;--border:rgba(255,255,255,.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
+.login-card{background:#0f0f1a;border:1px solid var(--border);border-radius:24px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;}
+.login-card h1{font-size:2.2rem;font-weight:800;letter-spacing:-2px;margin-bottom:.25rem;}
+.login-card h1 span{color:#b400ff;}
+.login-sub{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:4px;color:#555;margin-bottom:2rem;}
+.lf{display:flex;flex-direction:column;gap:.75rem;}
+.li{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;color:#fff;font-family:'Syne',sans-serif;font-size:.95rem;outline:none;width:100%;transition:border-color .3s;}
+.li:focus{border-color:#b400ff;}
+.li::placeholder{color:#333;}
+.lb{background:#b400ff;border:none;border-radius:12px;padding:1rem;color:#fff;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 0 25px rgba(180,0,255,.4);transition:all .3s;}
+.lb:hover{opacity:.9;}
+.lerr{color:#ff5555;font-size:.8rem;margin-top:.5rem;display:none;font-family:'Space Mono',monospace;}
+
+/* ADMIN */
+#adminApp{display:none;}
+.admin-header{background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.admin-header h1{font-size:1.3rem;font-weight:800;letter-spacing:-1px;}
+.admin-header h1 span{color:var(--accent);text-shadow:0 0 15px var(--glow);}
+.logout-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;padding:.45rem .9rem;color:#aaa;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.logout-btn:hover{color:#ff5555;border-color:#ff5555;}
+
+/* PREVIEW BAR */
+.prev-bar{padding:1rem 1.5rem;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.prev-label{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:3px;color:#444;flex-shrink:0;}
+.prev-name{font-size:1.4rem;font-weight:800;letter-spacing:-1px;color:var(--accent);text-shadow:0 0 15px var(--glow);transition:all .3s;}
+.prev-host{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:2px;color:var(--text2);margin-left:auto;}
+
+.admin-body{max-width:1000px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:680px){.admin-body{grid-template-columns:1fr;}}
+
+.acard{background:#0f0f1a;border:1px solid var(--border);border-radius:20px;padding:1.5rem;}
+.acard.full{grid-column:1/-1;}
+.acard-title{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:4px;color:#444;margin-bottom:1.25rem;}
+.afield{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;}
+.alabel{font-size:.65rem;color:#666;font-family:'Space Mono',monospace;letter-spacing:2px;}
+.ainput{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;color:#fff;font-family:'Syne',sans-serif;font-size:.9rem;outline:none;width:100%;transition:border-color .3s;}
+.ainput:focus{border-color:var(--accent);}
+.ainput::placeholder{color:#333;}
+
+/* THEMES */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:1.25rem;}
+.topt{border-radius:12px;padding:.6rem .3rem;cursor:pointer;border:2px solid transparent;text-align:center;font-size:.58rem;font-weight:700;letter-spacing:1px;transition:all .25s;background:rgba(255,255,255,.04);color:#666;}
+.topt:hover{color:#fff;background:rgba(255,255,255,.07);}
+.topt.on{border-color:var(--accent);background:rgba(255,255,255,.08);color:#fff;box-shadow:0 0 10px var(--glow);}
+.tdot{width:22px;height:22px;border-radius:50%;margin:0 auto 5px;}
+
+/* COLORS */
+.color-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-bottom:1.25rem;}
+.cchip{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.cchip:hover{transform:scale(1.1);}
+.cchip.on{border-color:#fff;transform:scale(1.18);box-shadow:0 0 10px rgba(255,255,255,.4);}
+
+/* SAVE */
+.save-btn{width:100%;padding:.9rem;border-radius:14px;border:none;background:var(--accent);color:#fff;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s;box-shadow:0 0 18px var(--glow);}
+.save-btn:hover{opacity:.9;transform:translateY(-1px);}
+.save-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.save-fb{text-align:center;margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;height:14px;transition:all .3s;}
+.save-fb.ok{color:#00ff88;}
+.save-fb.err{color:#ff5555;}
+
+/* QR */
+.qr-box{border-radius:16px;padding:1.75rem 1.5rem;text-align:center;margin-bottom:1rem;display:flex;flex-direction:column;align-items:center;gap:.9rem;background:linear-gradient(135deg,#0d0d2b,#1a0533);transition:background .5s;}
+.qr-name{font-size:1.4rem;font-weight:800;letter-spacing:-1px;transition:color .3s;}
+.qr-host{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:3px;color:rgba(255,255,255,.45);}
+.qr-wrap{background:#fff;border-radius:12px;padding:12px;display:inline-block;}
+.qr-scan{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.35);}
+.qr-btns{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.qbtn{padding:.75rem;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.qbtn:hover{background:rgba(255,255,255,.1);}
+.qbtn.pr{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--glow);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.stat-box{background:rgba(0,0,0,.3);border-radius:14px;padding:1rem;text-align:center;border:1px solid var(--border);}
+.stat-num{font-size:2.2rem;font-weight:800;line-height:1;}
+.stat-lbl{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:2px;color:#444;margin-top:4px;}
+
+/* GALLERY */
+.gal-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem;}
+.gal-toolbar-title{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:3px;color:#444;}
+.gal-btns{display:flex;gap:.4rem;flex-wrap:wrap;}
+.gbtn{padding:.45rem .8rem;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.gbtn:hover{background:rgba(255,255,255,.1);}
+.gbtn.blue{background:#0055ff;border-color:#0055ff;}
+.gbtn.red{background:#cc2200;border-color:#cc2200;}
+.sel-info{font-family:'Space Mono',monospace;font-size:.55rem;color:#555;letter-spacing:1px;margin-bottom:.75rem;}
+
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem;margin-top:.5rem;}
+.admin-item{position:relative;border-radius:12px;overflow:hidden;border:2px solid transparent;aspect-ratio:1;cursor:pointer;transition:all .2s;}
+.admin-item img,.admin-item video{width:100%;height:100%;object-fit:cover;display:block;}
+.admin-item:hover{border-color:rgba(255,255,255,.3);}
+.admin-item.sel{border-color:#00ff88;box-shadow:0 0 12px rgba(0,255,136,.5);}
+.item-check{position:absolute;top:5px;left:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,255,136,.9);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#000;opacity:0;transition:opacity .2s;}
+.admin-item.sel .item-check{opacity:1;}
+.item-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:.4rem;gap:.3rem;opacity:0;transition:opacity .2s;}
+.admin-item:hover .item-overlay{opacity:1;}
+.item-name{font-family:'Space Mono',monospace;font-size:.5rem;color:rgba(255,255,255,.7);text-align:center;}
+.item-btns{display:flex;gap:.3rem;}
+.ibtn{padding:.3rem .5rem;border-radius:7px;border:none;font-family:'Syne',sans-serif;font-size:.6rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap;}
+.ibtn.dl{background:#0066ff;color:#fff;}
+.ibtn.del{background:#cc2200;color:#fff;}
+.empty-gal{text-align:center;padding:2rem;color:#333;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;}
+
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:#16162a;border:1px solid var(--border);border-radius:12px;padding:.6rem 1.25rem;font-size:.85rem;z-index:9999;transition:transform .3s;white-space:nowrap;}
+#toast.on{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>PARTY <span>ADMIN</span></h1>
+    <div class="login-sub">PANEL DE CONTROL</div>
+    <div class="lf">
+      <input class="li" id="lemail" type="email" placeholder="Email..." autocomplete="email"/>
+      <input class="li" id="lpass" type="password" placeholder="Contrasena..." autocomplete="current-password"/>
+      <button class="lb" onclick="doLogin()">INGRESAR</button>
+      <div class="lerr" id="lerr"></div>
+    </div>
+  </div>
+</div>
+
+<div id="adminApp">
+  <div class="admin-header">
+    <h1>PARTY <span id="hSpan">ADMIN</span></h1>
+    <button class="logout-btn" onclick="doLogout()">SALIR</button>
+  </div>
+
+  <div class="prev-bar">
+    <div class="prev-label">VISTA PREVIA:</div>
+    <div class="prev-name" id="prevName">NOMBRE DE LA FIESTA</div>
+    <div class="prev-host" id="prevHost">CUMPLEANERO</div>
+  </div>
+
+  <div class="admin-body">
+
+    <div class="acard">
+      <div class="acard-title">DATOS DE LA FIESTA</div>
+      <div class="afield"><div class="alabel">NOMBRE</div><input class="ainput" id="cfgName" placeholder="Ej: Noche Electrica..." maxlength="40" oninput="livePreview()"/></div>
+      <div class="afield"><div class="alabel">CUMPLEANERO/A</div><input class="ainput" id="cfgHost" placeholder="Nombre..." maxlength="30" oninput="livePreview()"/></div>
+      <div class="afield"><div class="alabel">URL DE LA APP (para el QR)</div><input class="ainput" id="cfgUrl" placeholder="https://tuapp.netlify.app/party-app.html"/></div>
+      <button class="save-btn" id="saveBtn" onclick="saveConfig()">GUARDAR TODO</button>
+      <div class="save-fb" id="saveFb"></div>
+    </div>
+
+    <div class="acard">
+      <div class="acard-title">TEMA VISUAL</div>
+      <div class="theme-grid">
+        <div class="topt on" data-t="tomorrow" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#b400ff,#00fff7)"></div>TOMORROW</div>
+        <div class="topt" data-t="cyber" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#00fff7,#ff006e)"></div>CYBER</div>
+        <div class="topt" data-t="rave" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#ff003c,#ff6b00)"></div>RAVE</div>
+        <div class="topt" data-t="galactic" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#ffe600,#00c3ff)"></div>GALACTIC</div>
+        <div class="topt" data-t="tropical" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#00ff88,#ffdd00)"></div>TROPICAL</div>
+        <div class="topt" data-t="minimal" onclick="pickT(this)"><div class="tdot" style="background:linear-gradient(135deg,#fff,#555)"></div>MINIMAL</div>
+      </div>
+      <div class="acard-title">COLOR ACENTO</div>
+      <div class="color-grid">
+        <div class="cchip on" data-c="#b400ff" style="background:#b400ff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff006e" style="background:#ff006e" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff00cc" style="background:#ff00cc" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#7700ff" style="background:#7700ff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#cc44ff" style="background:#cc44ff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff44aa" style="background:#ff44aa" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#00fff7" style="background:#00fff7" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#00c3ff" style="background:#00c3ff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#0066ff" style="background:#0066ff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#00ffaa" style="background:#00ffaa" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#44ddff" style="background:#44ddff" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#0033cc" style="background:#0033cc" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff003c" style="background:#ff003c" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff6b00" style="background:#ff6b00" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff4400" style="background:#ff4400" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ffaa00" style="background:#ffaa00" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff2266" style="background:#ff2266" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ff8800" style="background:#ff8800" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#00ff88" style="background:#00ff88" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ffe600" style="background:#ffe600" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#44ff44" style="background:#44ff44" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ccff00" style="background:#ccff00" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#00cc44" style="background:#00cc44" onclick="pickC(this)"></div>
+        <div class="cchip" data-c="#ffffff" style="background:#ffffff" onclick="pickC(this)"></div>
+      </div>
+      <button class="save-btn" onclick="saveConfig()">GUARDAR TEMA</button>
+      <div class="save-fb" id="saveFb2"></div>
+    </div>
+
+    <div class="acard">
+      <div class="acard-title">CODIGO QR PARA IMPRIMIR</div>
+      <div class="qr-box" id="qrBox">
+        <div class="qr-host" id="qrHost">CUMPLEANERO</div>
+        <div class="qr-name" id="qrName">NOMBRE</div>
+        <div class="qr-wrap"><div id="qrcode"></div></div>
+        <div class="qr-scan">ESCANEÁ Y SUBÍ TUS FOTOS</div>
+      </div>
+      <div class="qr-btns">
+        <button class="qbtn" onclick="generateQR()">GENERAR QR</button>
+        <button class="qbtn pr" onclick="printQR()">IMPRIMIR</button>
+      </div>
+    </div>
+
+    <div class="acard">
+      <div class="acard-title">ESTADISTICAS EN VIVO</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="sPhotos" style="color:var(--accent)">0</div><div class="stat-lbl">FOTOS</div></div>
+        <div class="stat-box"><div class="stat-num" id="sVideos" style="color:#00fff7">0</div><div class="stat-lbl">VIDEOS</div></div>
+        <div class="stat-box"><div class="stat-num" id="sLikes" style="color:#ff006e">0</div><div class="stat-lbl">LIKES</div></div>
+        <div class="stat-box"><div class="stat-num" id="sComments" style="color:#ffe600">0</div><div class="stat-lbl">COMENTARIOS</div></div>
+      </div>
+    </div>
+
+    <div class="acard full">
+      <div class="gal-toolbar">
+        <div class="gal-toolbar-title">GALERIA DE FOTOS</div>
+        <div class="gal-btns">
+          <button class="gbtn" onclick="toggleSelAll()">SELECCIONAR TODO</button>
+          <button class="gbtn blue" onclick="downloadSel()" id="dlBtn" style="display:none">DESCARGAR SELEC.</button>
+          <button class="gbtn red" onclick="deleteSel()" id="delSelBtn" style="display:none">ELIMINAR SELEC.</button>
+        </div>
+      </div>
+      <div class="sel-info" id="selInfo">Toca una foto para seleccionarla · Hover para ver opciones</div>
+      <div class="admin-grid" id="adminGrid"><div class="empty-gal">CARGANDO...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var FC = {
+  apiKey: "AIzaSyAKzHGUhQh_dUVbkRVKeCpsIBNAlvT6zU8",
+  authDomain: "masuno-b1ce3.firebaseapp.com",
+  projectId: "masuno-b1ce3",
+  storageBucket: "masuno-b1ce3.firebasestorage.app",
+  messagingSenderId: "701219611332",
+  appId: "1:701219611332:web:732c60dc1fcfcbaecadf91"
+};
+firebase.initializeApp(FC);
+var auth = firebase.auth();
+var db = firebase.firestore();
+
+var curTheme = 'tomorrow';
+var curColor = '#b400ff';
+var curPid = '';
+var unsub = null;
+var allItems = [];
+var selIds = [];
+
+var THEMES = {
+  tomorrow: 'linear-gradient(135deg,#0d0d2b,#1a0533,#2d0a4e)',
+  cyber:    'linear-gradient(135deg,#000d1a,#001a33)',
+  rave:     'linear-gradient(135deg,#1a0005,#3d0020)',
+  galactic: 'linear-gradient(135deg,#000510,#000c20)',
+  tropical: 'linear-gradient(135deg,#001a10,#002800)',
+  minimal:  'linear-gradient(135deg,#0f0f0f,#1a1a1a)'
+};
+
+auth.onAuthStateChanged(function(u) {
+  if (u) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    loadConfig();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminApp').style.display = 'none';
+  }
+});
+
+function doLogin() {
+  var email = document.getElementById('lemail').value.trim();
+  var pass  = document.getElementById('lpass').value;
+  var errEl = document.getElementById('lerr');
+  errEl.style.display = 'none';
+  auth.signInWithEmailAndPassword(email, pass).catch(function(e) {
+    errEl.textContent = 'Email o contrasena incorrectos';
+    errEl.style.display = 'block';
+  });
+}
+document.getElementById('lpass').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
+function doLogout() { auth.signOut(); }
+
+function applyColors(theme, color) {
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--glow', 'rgba('+hexToRgb(color)+',0.4)');
+  var qrBox = document.getElementById('qrBox');
+  if(qrBox) qrBox.style.background = THEMES[theme] || THEMES.tomorrow;
+  var qrName = document.getElementById('qrName');
+  if(qrName) qrName.style.color = color;
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var n=parseInt(hex,16);
+  return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255);
+}
+
+function pickT(el) {
+  document.querySelectorAll('.topt').forEach(function(o){o.classList.remove('on');});
+  el.classList.add('on');
+  curTheme = el.dataset.t;
+  applyColors(curTheme, curColor);
+}
+
+function pickC(el) {
+  document.querySelectorAll('.cchip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  curColor = el.dataset.c;
+  applyColors(curTheme, curColor);
+}
+
+function livePreview() {
+  var name = document.getElementById('cfgName').value || 'NOMBRE DE LA FIESTA';
+  var host = document.getElementById('cfgHost').value || 'CUMPLEANERO';
+  document.getElementById('prevName').textContent = name.toUpperCase();
+  document.getElementById('prevHost').textContent = 'CUMPLE DE ' + host.toUpperCase();
+  document.getElementById('qrName').textContent = name.toUpperCase();
+  document.getElementById('qrHost').textContent = 'CUMPLEANIOS DE ' + host.toUpperCase();
+}
+
+function loadConfig() {
+  db.collection('config').doc('party').get().then(function(doc) {
+    if (doc.exists) {
+      var d = doc.data();
+      if(d.name) document.getElementById('cfgName').value = d.name;
+      if(d.host) document.getElementById('cfgHost').value = d.host;
+      if(d.url)  document.getElementById('cfgUrl').value  = d.url;
+      if(d.theme) {
+        curTheme = d.theme;
+        document.querySelectorAll('.topt').forEach(function(o){o.classList.toggle('on', o.dataset.t===d.theme);});
+      }
+      if(d.color) {
+        curColor = d.color;
+        document.querySelectorAll('.cchip').forEach(function(c){c.classList.toggle('on', c.dataset.c===d.color);});
+      }
+      curPid = d.partyId || ('party_'+Date.now());
+      applyColors(curTheme, curColor);
+      livePreview();
+      loadGallery();
+    } else {
+      curPid = 'party_'+Date.now();
+      db.collection('config').doc('party').set({partyId:curPid,theme:'tomorrow',color:'#b400ff'});
+      loadGallery();
+    }
+  }).catch(function(e){ showToast('Error cargando config'); console.error(e); });
+}
+
+function saveConfig() {
+  var name = document.getElementById('cfgName').value.trim();
+  var host = document.getElementById('cfgHost').value.trim();
+  var url  = document.getElementById('cfgUrl').value.trim();
+  if(!name||!host){ showToast('Completa nombre y cumpleanero'); return; }
+  if(!curPid) curPid = 'party_'+Date.now();
+  var btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'GUARDANDO...';
+  db.collection('config').doc('party').set({
+    name:name, host:host, url:url, theme:curTheme, color:curColor, partyId:curPid
+  }).then(function() {
+    showFb('GUARDADO CON EXITO', false);
+    showToast('Guardado!');
+    livePreview();
+  }).catch(function(e) {
+    showFb('ERROR AL GUARDAR', true);
+    showToast('Error al guardar');
+  }).finally(function() {
+    btn.disabled=false; btn.textContent='GUARDAR TODO';
+  });
+}
+
+function showFb(msg, isErr) {
+  ['saveFb','saveFb2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = msg;
+    el.className = 'save-fb ' + (isErr?'err':'ok');
+    setTimeout(function(){ el.textContent=''; el.className='save-fb'; }, 4000);
+  });
+}
+
+var qrInst = null;
+function generateQR() {
+  var url = document.getElementById('cfgUrl').value.trim();
+  if(!url){ showToast('Primero guarda la URL'); return; }
+  livePreview(); applyColors(curTheme, curColor);
+  var el = document.getElementById('qrcode');
+  el.innerHTML = '';
+  new QRCode(el,{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  showToast('QR generado!');
+}
+
+function printQR() {
+  var name = document.getElementById('cfgName').value.trim() || 'LA FIESTA';
+  var host = document.getElementById('cfgHost').value.trim() || '';
+  var qrEl = document.getElementById('qrcode');
+  var canvas = qrEl.querySelector('canvas');
+  if(!canvas){ showToast('Primero genera el QR'); return; }
+  var img = canvas.toDataURL('image/png');
+  var bg = THEMES[curTheme] || THEMES.tomorrow;
+  var c = curColor;
+  var w = window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>QR '+name+'</title>'+
+  '<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono&display=swap" rel="stylesheet">'+
+  '<style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'+
+  '*{margin:0;padding:0;box-sizing:border-box;}'+
+  'body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Syne,sans-serif;}'+
+  '.card{background:'+bg+';border-radius:28px;padding:2.5rem 2rem;text-align:center;width:360px;border:2px solid '+c+';box-shadow:0 0 60px '+c+'55;}'+
+  '.stars{font-size:1.2rem;opacity:.5;margin-bottom:.75rem;letter-spacing:8px;}'+
+  '.host{font-family:Space Mono,monospace;font-size:.65rem;letter-spacing:4px;color:'+c+';margin-bottom:.4rem;}'+
+  'h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-1px;margin:0 0 1.75rem;text-shadow:0 0 30px '+c+'88;}'+
+  '.qrf{background:#fff;border-radius:14px;padding:14px;display:inline-block;margin-bottom:1.75rem;}'+
+  '.cta{font-family:Space Mono,monospace;font-size:.62rem;letter-spacing:3px;color:'+c+';}'+
+  '.sub{font-family:Space Mono,monospace;font-size:.52rem;letter-spacing:2px;color:rgba(255,255,255,.35);margin-top:.4rem;}'+
+  '</style></head><body>'+
+  '<div class="card">'+
+  '<div class="stars">* * *</div>'+
+  '<div class="host">CUMPLEANIOS DE '+host.toUpperCase()+'</div>'+
+  '<h1>'+name.toUpperCase()+'</h1>'+
+  '<div class="qrf"><img src="'+img+'" width="160" height="160"/></div>'+
+  '<div class="cta">ESCANEÁ Y SUBÍ TUS FOTOS</div>'+
+  '<div class="sub">Compartí este momento especial</div>'+
+  '</div>'+
+  '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  w.document.close();
+}
+
+function loadGallery() {
+  if(!curPid) return;
+  if(unsub) unsub();
+  unsub = db.collection('parties').doc(curPid).collection('media')
+    .orderBy('createdAt','desc')
+    .onSnapshot(function(snap) {
+      allItems = snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+      renderGallery();
+      updateStats();
+    });
+}
+
+function renderGallery() {
+  var g = document.getElementById('adminGrid');
+  if(!allItems.length){ g.innerHTML='<div class="empty-gal">NO HAY FOTOS AUN</div>'; return; }
+  g.innerHTML = '';
+  allItems.forEach(function(item) {
+    var isSel = selIds.indexOf(item.id) >= 0;
+    var d = document.createElement('div');
+    d.className = 'admin-item' + (isSel?' sel':'');
+    d.setAttribute('data-id', item.id);
+    d.setAttribute('data-url', item.url);
+    d.setAttribute('data-type', item.type||'image');
+    d.onclick = function(e) {
+      if(e.target.classList.contains('ibtn')) return;
+      toggleSel(item.id);
+    };
+    var mediaHtml = item.type==='video'
+      ? '<video src="'+item.url+'" muted preload="metadata"></video>'
+      : '<img src="'+item.url+'" loading="lazy">';
+    d.innerHTML = mediaHtml +
+      '<div class="item-check">&#10003;</div>' +
+      '<div class="item-overlay">'+
+        '<div class="item-name">'+(item.uploaderName||'Anonimo')+'</div>'+
+        '<div class="item-btns">'+
+          '<a class="ibtn dl" href="'+item.url+'" target="_blank" download onclick="event.stopPropagation()">&#11015; BAJAR</a>'+
+          '<button class="ibtn del" onclick="event.stopPropagation();delOne(\''+item.id+'\',this)">&#128465; BORRAR</button>'+
+        '</div>'+
+      '</div>';
+    g.appendChild(d);
+  });
+  updateSelUI();
+}
+
+function toggleSel(id) {
+  var idx = selIds.indexOf(id);
+  if(idx >= 0) selIds.splice(idx,1); else selIds.push(id);
+  var el = document.querySelector('.admin-item[data-id="'+id+'"]');
+  if(el) el.classList.toggle('sel', selIds.indexOf(id)>=0);
+  updateSelUI();
+}
+
+function updateSelUI() {
+  var n = selIds.length;
+  var dlBtn = document.getElementById('dlBtn');
+  var delSelBtn = document.getElementById('delSelBtn');
+  var selInfo = document.getElementById('selInfo');
+  if(dlBtn) dlBtn.style.display = n>0 ? 'inline-block' : 'none';
+  if(delSelBtn) delSelBtn.style.display = n>0 ? 'inline-block' : 'none';
+  if(selInfo) selInfo.textContent = n>0
+    ? n+' seleccionada'+(n>1?'s':'')+' — toca para deseleccionar'
+    : 'Toca una foto para seleccionarla · Hover para ver opciones';
+}
+
+function toggleSelAll() {
+  if(selIds.length === allItems.length) {
+    selIds = [];
+  } else {
+    selIds = allItems.map(function(i){ return i.id; });
+  }
+  renderGallery();
+}
+
+function downloadSel() {
+  var items = allItems.filter(function(i){ return selIds.indexOf(i.id)>=0; });
+  if(!items.length) return;
+  items.forEach(function(item, idx) {
+    setTimeout(function() {
+      var a = document.createElement('a');
+      a.href = item.url;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }, idx*600);
+  });
+  showToast('Abriendo '+items.length+' archivo'+(items.length>1?'s':'')+'...');
+}
+
+function deleteSel() {
+  var n = selIds.length;
+  if(!n) return;
+  if(!confirm('Eliminar '+n+' archivo'+(n>1?'s':'')+' ?')) return;
+  var ids = selIds.slice();
+  var promises = ids.map(function(id) {
+    return db.collection('parties').doc(curPid).collection('media').doc(id).delete();
+  });
+  Promise.all(promises).then(function() {
+    selIds = [];
+    showToast('Eliminados correctamente');
+  }).catch(function(){ showToast('Error al eliminar'); });
+}
+
+function delOne(id, btn) {
+  if(!confirm('Eliminar esta foto/video?')) return;
+  btn.textContent='...'; btn.disabled=true;
+  db.collection('parties').doc(curPid).collection('media').doc(id).delete()
+    .then(function(){ showToast('Eliminado'); })
+    .catch(function(){ showToast('Error'); btn.textContent='Borrar'; btn.disabled=false; });
+}
+
+function updateStats() {
+  document.getElementById('sPhotos').textContent   = allItems.filter(function(i){return i.type==='image';}).length;
+  document.getElementById('sVideos').textContent   = allItems.filter(function(i){return i.type==='video';}).length;
+  document.getElementById('sLikes').textContent    = allItems.reduce(function(s,i){return s+(i.likes||0);},0);
+  document.getElementById('sComments').textContent = allItems.reduce(function(s,i){return s+(i.comments?i.comments.length:0);},0);
+}
+
+function showToast(msg) {
+  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},3000);
+}
+</script>
+</body>
+</html>
