@@ -303,13 +303,21 @@ function doLogin() {
   var email = document.getElementById('lemail').value.trim();
   var pass  = document.getElementById('lpass').value;
   var errEl = document.getElementById('lerr');
+  var btn   = document.querySelector('.lb');
+  if(!email || !pass) { errEl.textContent='Completa email y contrasena'; errEl.style.display='block'; return; }
   errEl.style.display = 'none';
-  auth.signInWithEmailAndPassword(email, pass).catch(function(e) {
-    errEl.textContent = 'Email o contrasena incorrectos';
-    errEl.style.display = 'block';
-  });
+  btn.textContent = 'INGRESANDO...';
+  btn.disabled = true;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(function(){ btn.textContent='INGRESAR'; btn.disabled=false; })
+    .catch(function(e) {
+      errEl.textContent = 'Email o contrasena incorrectos (' + (e.code||e.message) + ')';
+      errEl.style.display = 'block';
+      btn.textContent = 'INGRESAR';
+      btn.disabled = false;
+    });
 }
-document.getElementById('lpass').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
+document.addEventListener('DOMContentLoaded', function(){ var lp=document.getElementById('lpass'); if(lp) lp.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); }); });
 function doLogout() { auth.signOut(); }
 
 function applyColors(theme, color) {
