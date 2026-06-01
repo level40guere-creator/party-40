@@ -532,13 +532,35 @@ function toggleBan(name) {
   var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
   if (isBanned) {
     bannedList = bannedList.filter(function(b){ return b.toLowerCase()!==name.toLowerCase(); });
-    showToast(name+' desbloqueado');
+    db.collection('config').doc('banned').set({names:bannedList}).then(function(){
+      showToast(name+' desbloqueado ✓');
+      renderUsers();
+    });
   } else {
-    if (!confirm('Bloquear a '+name+'?')) return;
-    bannedList.push(name);
-    showToast(name+' bloqueado');
+    showConfirm('Bloquear a ' + name + '?', function() {
+      bannedList.push(name);
+      db.collection('config').doc('banned').set({names:bannedList}).then(function(){
+        showToast(name+' bloqueado 🚫');
+        renderUsers();
+      });
+    });
   }
-  db.collection('config').doc('banned').set({names:bannedList}).then(function(){ renderUsers(); });
+}
+
+function showConfirm(msg, onYes) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:2rem;';
+  overlay.innerHTML =
+    '<div style="background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:1.75rem;max-width:320px;width:100%;text-align:center;">' +
+      '<div style="font-size:1rem;font-weight:700;margin-bottom:1.5rem;">'+msg+'</div>' +
+      '<div style="display:flex;gap:.75rem;">' +
+        '<button id="confirmNo" style="flex:1;padding:.85rem;border-radius:12px;border:1px solid #333;background:rgba(255,255,255,.07);color:#fff;font-family:Syne,sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;">CANCELAR</button>' +
+        '<button id="confirmYes" style="flex:1;padding:.85rem;border-radius:12px;border:none;background:#ff3333;color:#fff;font-family:Syne,sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;">BLOQUEAR</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('confirmYes').onclick = function(){ document.body.removeChild(overlay); onYes(); };
+  document.getElementById('confirmNo').onclick = function(){ document.body.removeChild(overlay); };
 }
 
 /* GALLERY */
