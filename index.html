@@ -410,6 +410,7 @@ function renderFeed(){
     var lkKey='l_'+pid+'_'+item.id;
     var isLiked=!!localStorage.getItem(lkKey);
     var comments=item.comments||[];
+    var cmtCount=comments.length;
     var timeStr=item.createdAt&&item.createdAt.toDate?timeAgo(item.createdAt.toDate()):'ahora';
     var likesN=item.likes||0;
 
@@ -479,6 +480,7 @@ function openCmts(id){
   var item=media.find(function(m){return m.id===id;});
   if(!item)return;
   var comments=item.comments||[];
+    var cmtCount=comments.length;
   var list=document.getElementById('cmtList');
   if(!comments.length){list.innerHTML='<div class="cmt-empty">No hay comentarios aun.<br>Se el primero!</div>';}
   else{
