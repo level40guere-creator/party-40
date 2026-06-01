@@ -3,35 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Party Fotos</title>
 <meta name="theme-color" content="#07070f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Party Fotos">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
-<title>Party Fotos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --accent:#b400ff;--accent2:#00fff7;--glow:rgba(180,0,255,.45);
-  --bg:#000;--bg2:#111;--bg3:#1a1a1a;
-  --text:#fff;--text2:#999;--border:#262626;
+  --bg:#07070f;--bg2:#0f0f1a;--bg3:#16162a;
+  --text:#fff;--text2:#aac;--card:rgba(16,16,30,.95);--border:rgba(255,255,255,.1);
+  --b1:#b400ff;--b2:#00fff7;--b3:#ff006e;--b4:#ffe600;
 }
-[data-theme="cyber"]    {--accent:#00fff7;--accent2:#ff006e;--glow:rgba(0,255,247,.4);}
-[data-theme="rave"]     {--accent:#ff003c;--accent2:#ff6b00;--glow:rgba(255,0,60,.4);}
-[data-theme="galactic"] {--accent:#ffe600;--accent2:#00c3ff;--glow:rgba(255,230,0,.38);}
-[data-theme="tropical"] {--accent:#00ff88;--accent2:#ffdd00;--glow:rgba(0,255,136,.38);}
-[data-theme="minimal"]  {--accent:#ffffff;--accent2:#888;--glow:rgba(255,255,255,.15);}
+[data-theme="cyber"]    {--accent:#00fff7;--accent2:#ff006e;--glow:rgba(0,255,247,.4);--b1:#00fff7;--b2:#ff006e;--b3:#ffe600;--b4:#00ff88;}
+[data-theme="rave"]     {--accent:#ff003c;--accent2:#ff6b00;--glow:rgba(255,0,60,.4);--b1:#ff003c;--b2:#ff6b00;--b3:#cc00ff;--b4:#fff;}
+[data-theme="galactic"] {--accent:#ffe600;--accent2:#00c3ff;--glow:rgba(255,230,0,.38);--b1:#ffe600;--b2:#00c3ff;--b3:#fff;--b4:#ff88cc;}
+[data-theme="tropical"] {--accent:#00ff88;--accent2:#ffdd00;--glow:rgba(0,255,136,.38);--b1:#00ff88;--b2:#ffdd00;--b3:#ff5500;--b4:#00ccff;}
+[data-theme="minimal"]  {--accent:#ffffff;--accent2:#888;--glow:rgba(255,255,255,.15);--b1:#fff;--b2:#888;--b3:#555;--b4:#333;}
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{overflow-x:hidden;background:#000;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff;font-size:17px;line-height:1.4;}
+html,body{overflow-x:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-#bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.6;}
+#bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 
 /* LOADING */
-#loadingScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:10;gap:1rem;background:#000;}
-.load-logo{font-size:3rem;font-weight:800;letter-spacing:-2px;font-family:'Helvetica Neue',sans-serif;}
+#loadingScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:10;gap:1rem;}
+.load-logo{font-size:3.5rem;font-weight:800;letter-spacing:-3px;font-family:'Syne',sans-serif;}
 .load-logo span{color:var(--accent);}
 .load-dots{display:flex;gap:.5rem;}
 .load-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s infinite;}
@@ -40,150 +41,151 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
 @keyframes pulse{0%,100%{opacity:.2;transform:scale(.8);}50%{opacity:1;transform:scale(1.2);}}
 
 /* APP */
-#appScreen{display:none;min-height:100vh;position:relative;z-index:1;padding-bottom:65px;max-width:480px;margin:0 auto;}
+#appScreen{display:none;min-height:100vh;position:relative;z-index:1;padding-bottom:70px;max-width:470px;margin:0 auto;}
 
-/* HEADER */
+/* HEADER — Instagram style */
 .app-header{
   position:sticky;top:0;z-index:100;
-  background:rgba(0,0,0,.95);backdrop-filter:blur(12px);
+  background:rgba(7,7,15,.97);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
-  padding:12px 16px;
+  padding:.75rem 1rem;
   display:flex;align-items:center;justify-content:space-between;
 }
-.header-logo{font-size:28px;font-weight:700;color:var(--accent);text-shadow:0 0 20px var(--glow);letter-spacing:-.5px;font-family:'Helvetica Neue',sans-serif;}
-.header-icons{display:flex;gap:20px;align-items:center;}
-.hico{background:none;border:none;color:#fff;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;}
-.hico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.header-logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-1px;color:var(--accent);text-shadow:0 0 20px var(--glow);}
+.header-icons{display:flex;gap:1rem;align-items:center;}
+.hico{background:none;border:none;color:var(--text);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
+.hico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* FEED */
-.feed{display:flex;flex-direction:column;}
-.post{border-bottom:1px solid var(--border);}
-
-/* Post header */
-.post-header{display:flex;align-items:center;padding:10px 14px;gap:10px;}
-.post-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0;color:#fff;border:2px solid var(--accent);}
-.post-user{flex:1;}
-.post-username{font-size:15px;font-weight:700;color:#fff;}
-.post-time{font-size:13px;color:var(--text2);margin-top:1px;}
-.post-more{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px;line-height:1;}
-
-/* Media */
-.post-media{width:100%;background:#111;position:relative;}
-.post-media img{width:100%;display:block;object-fit:cover;aspect-ratio:1/1;}
-.post-media video{width:100%;display:block;max-height:500px;object-fit:cover;}
-
-/* Actions */
-.post-actions{display:flex;align-items:center;padding:8px 12px 4px;gap:6px;}
-.act-btn{background:none;border:none;cursor:pointer;padding:6px 8px;color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
-.act-btn:active{transform:scale(1.25);}
-.act-btn svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.act-btn.liked svg{fill:#ff3040;stroke:#ff3040;}
-.act-spacer{flex:1;}
-
-/* Post info */
-.post-likes{font-size:15px;font-weight:700;padding:2px 16px 4px;color:#fff;}
-.post-caption{font-size:15px;padding:0 16px 6px;line-height:1.5;color:#fff;}
-.post-caption strong{font-weight:700;margin-right:5px;}
-
-/* Comments preview */
-.post-comments-preview{padding:0 16px 4px;}
-.cmts-count{font-size:15px;color:var(--text2);cursor:pointer;padding:2px 0;}
-.cmts-count:active{opacity:.7;}
-.comment-preview-line{font-size:15px;padding:2px 0;line-height:1.5;color:#fff;}
-.comment-preview-line strong{font-weight:700;margin-right:5px;}
-.post-time-small{font-size:12px;color:var(--text2);padding:4px 16px 8px;}
-
-/* Comment input bar */
-.comment-bar{display:flex;align-items:center;padding:8px 14px 10px;gap:10px;border-top:1px solid #111;}
-.cbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));flex-shrink:0;font-size:13px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;}
-.cbar-input{flex:1;background:none;border:none;color:#fff;font-size:15px;outline:none;font-family:inherit;}
-.cbar-input::placeholder{color:#555;}
-.cbar-send{background:none;border:none;color:var(--accent);font-size:15px;font-weight:700;cursor:pointer;padding:0;opacity:.4;transition:opacity .2s;white-space:nowrap;}
-.cbar-send.on{opacity:1;}
-
-/* COMMENTS MODAL */
-#cmtModal{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center;}
-#cmtModal.open{display:flex;}
-.cmt-sheet{background:#1a1a1a;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;border-top:1px solid #333;}
-.cmt-sheet-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #333;flex-shrink:0;}
-.cmt-sheet-title{font-size:17px;font-weight:700;}
-.cmt-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;}
-.cmt-list{flex:1;overflow-y:auto;padding:8px 0;}
-.cmt-item{display:flex;align-items:flex-start;padding:10px 16px;gap:10px;}
-.cmt-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;color:#fff;}
-.cmt-body{flex:1;}
-.cmt-name{font-size:15px;font-weight:700;display:inline;margin-right:6px;}
-.cmt-text{font-size:15px;display:inline;color:#fff;line-height:1.5;}
-.cmt-time{font-size:12px;color:var(--text2);margin-top:3px;}
-.cmt-empty{text-align:center;padding:3rem 1rem;color:#555;font-size:15px;}
-.cmt-input-bar{display:flex;align-items:center;padding:10px 14px 20px;gap:10px;border-top:1px solid #333;flex-shrink:0;}
-.cmt-inp-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));flex-shrink:0;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;}
-.cmt-inp{flex:1;background:#262626;border:none;border-radius:22px;padding:10px 16px;color:#fff;font-size:15px;outline:none;font-family:inherit;}
-.cmt-inp::placeholder{color:#555;}
-.cmt-inp-send{background:none;border:none;color:var(--accent);font-size:15px;font-weight:700;cursor:pointer;padding:0 4px;opacity:.4;transition:opacity .2s;white-space:nowrap;}
-.cmt-inp-send.on{opacity:1;}
+/* STORIES ROW — upload bar */
+.stories-row{
+  display:flex;gap:.75rem;padding:.85rem 1rem;
+  overflow-x:auto;border-bottom:1px solid var(--border);
+  background:rgba(7,7,15,.6);
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.stories-row::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex-shrink:0;cursor:pointer;}
+.story-ring{
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(45deg,var(--accent),var(--accent2),var(--accent));
+  padding:2.5px;display:flex;align-items:center;justify-content:center;
+}
+.story-ring.add{background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.3);}
+.story-inner{width:100%;height:100%;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;overflow:hidden;}
+.story-label{font-size:.6rem;color:var(--text2);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* UPLOAD MODAL */
-#uploadModal{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.8);align-items:flex-end;justify-content:center;}
+#uploadModal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;}
 #uploadModal.open{display:flex;}
-.up-sheet{background:#1a1a1a;border-radius:16px 16px 0 0;padding:16px 16px 24px;width:100%;max-width:480px;border-top:1px solid #333;}
-.up-handle{width:36px;height:4px;background:#444;border-radius:2px;margin:0 auto 14px;}
-.up-title{font-size:18px;font-weight:700;margin-bottom:14px;}
-.upzone{border:2px dashed #333;border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .3s;position:relative;background:rgba(255,255,255,.02);margin-bottom:12px;}
-.upzone:hover,.upzone.dov{border-color:var(--accent);}
+.upload-sheet{background:var(--bg2);border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2rem;width:100%;max-width:470px;border-top:1px solid var(--border);}
+.sheet-handle{width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 1.25rem;}
+.sheet-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem;}
+.upzone{border:2px dashed rgba(255,255,255,.15);border-radius:16px;padding:2rem 1.25rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;background:rgba(255,255,255,.02);margin-bottom:.85rem;}
+.upzone:hover,.upzone.dov{border-color:var(--accent);background:rgba(180,0,255,.05);}
 .upzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.up-icon{font-size:2.2rem;margin-bottom:6px;}
-.up-txt{font-size:16px;font-weight:600;margin-bottom:3px;}
-.up-sub{font-size:13px;color:#777;}
-.prevs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.pthumb{position:relative;width:68px;height:68px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid #333;}
+.up-icon{font-size:2rem;margin-bottom:.4rem;}
+.up-txt{font-size:.85rem;font-weight:600;margin-bottom:.2rem;}
+.up-sub{font-size:.65rem;color:var(--text2);}
+.prevs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem;}
+.pthumb{position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);}
 .pthumb img,.pthumb video{width:100%;height:100%;object-fit:cover;}
-.pthumb .rm{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.8);border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.ni{width:100%;background:#262626;border:none;border-radius:12px;padding:12px 14px;color:#fff;font-size:16px;outline:none;margin-bottom:10px;font-family:inherit;}
-.ni::placeholder{color:#555;}
-.pbar{height:3px;background:#333;border-radius:2px;margin-bottom:8px;overflow:hidden;display:none;}
+.pthumb .rm{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.8);border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.ni{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:.7rem .9rem;color:var(--text);font-size:.9rem;outline:none;margin-bottom:.75rem;transition:border-color .3s;}
+.ni:focus{border-color:var(--accent);}
+.ni::placeholder{color:#333;}
+.pbar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:.5rem;overflow:hidden;display:none;}
 .pfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .3s;}
-.pst{font-size:13px;color:var(--accent);text-align:center;margin-bottom:6px;display:none;letter-spacing:1px;}
-.ubtn{width:100%;background:var(--accent);border:none;border-radius:12px;padding:14px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 0 16px var(--glow);}
+.pst{font-size:.6rem;color:var(--accent);text-align:center;margin-bottom:.5rem;display:none;font-family:'Space Mono',monospace;letter-spacing:2px;}
+.ubtn{width:100%;background:var(--accent);border:none;border-radius:12px;padding:.85rem;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 0 16px var(--glow);}
 .ubtn:disabled{opacity:.4;cursor:not-allowed;}
 
-/* EMPTY */
-.empty-feed{text-align:center;padding:5rem 1.5rem;color:#555;}
-.empty-feed .ei{font-size:3.5rem;margin-bottom:1rem;}
-.empty-feed p{font-size:16px;}
+/* FEED — Instagram style posts */
+.feed{display:flex;flex-direction:column;}
 
-/* BOTTOM NAV */
+.post{border-bottom:1px solid var(--border);background:var(--bg);}
+
+/* Post header */
+.post-header{display:flex;align-items:center;padding:.65rem .9rem;gap:.65rem;}
+.post-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;color:#fff;}
+.post-user{flex:1;}
+.post-username{font-size:.85rem;font-weight:700;line-height:1.2;}
+.post-time{font-size:.65rem;color:var(--text2);}
+.post-more{background:none;border:none;color:var(--text2);cursor:pointer;padding:.2rem;font-size:1.1rem;}
+
+/* Post image */
+.post-media{width:100%;display:block;position:relative;background:#000;}
+.post-media img{width:100%;display:block;max-height:600px;object-fit:contain;}
+.post-media video{width:100%;display:block;max-height:500px;object-fit:contain;}
+.video-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.video-play svg{width:48px;height:48px;fill:rgba(255,255,255,.8);}
+
+/* Post actions — Instagram style */
+.post-actions{display:flex;align-items:center;padding:.5rem .75rem;gap:.1rem;}
+.action-btn{background:none;border:none;cursor:pointer;padding:.4rem .5rem;color:var(--text);display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.action-btn:active{transform:scale(1.2);}
+.action-btn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.action-btn.liked svg{fill:#ff3040;stroke:#ff3040;}
+.action-spacer{flex:1;}
+
+/* Post info */
+.post-likes{font-size:.83rem;font-weight:700;padding:0 .9rem .25rem;}
+.post-caption{font-size:.83rem;padding:0 .9rem .3rem;line-height:1.4;}
+.post-caption strong{font-weight:700;margin-right:.3rem;}
+
+/* Comments */
+.post-comments{padding:0 .9rem;}
+.comment-line{font-size:.8rem;padding:.15rem 0;line-height:1.4;}
+.comment-line strong{font-weight:700;margin-right:.3rem;}
+.comment-line .ctime{font-size:.65rem;color:var(--text2);margin-left:.3rem;}
+.view-comments{font-size:.78rem;color:var(--text2);padding:.15rem 0;cursor:pointer;}
+
+/* Comment input */
+.post-comment-bar{display:flex;align-items:center;padding:.6rem .9rem;gap:.6rem;border-top:1px solid rgba(255,255,255,.05);}
+.comment-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));flex-shrink:0;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.comment-input-ig{flex:1;background:none;border:none;color:var(--text);font-size:.83rem;outline:none;font-family:inherit;}
+.comment-input-ig::placeholder{color:#444;}
+.comment-send-ig{background:none;border:none;color:var(--accent);font-size:.83rem;font-weight:700;cursor:pointer;padding:0;opacity:.5;transition:opacity .2s;}
+.comment-send-ig.active{opacity:1;}
+
+/* EMPTY */
+.empty-feed{text-align:center;padding:4rem 1.5rem;color:var(--text2);}
+.empty-feed .ei{font-size:3rem;margin-bottom:1rem;}
+.empty-feed p{font-size:.85rem;}
+
+/* BOTTOM NAV — Instagram style */
 .bottom-nav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:480px;
-  background:rgba(0,0,0,.97);backdrop-filter:blur(12px);
+  width:100%;max-width:470px;
+  background:rgba(7,7,15,.97);backdrop-filter:blur(20px);
   border-top:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-around;
-  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom));
   z-index:200;
 }
-.nav-ico{background:none;border:none;color:#fff;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;}
-.nav-ico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.nav-ico.add{background:var(--accent);border-radius:12px;padding:10px;box-shadow:0 0 16px var(--glow);}
-.nav-ico.add svg{width:26px;height:26px;stroke:#fff;}
+.nav-ico{background:none;border:none;color:var(--text);cursor:pointer;padding:.3rem;display:flex;align-items:center;justify-content:center;transition:color .2s;}
+.nav-ico:hover{color:var(--accent);}
+.nav-ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-ico.upload-btn-nav{background:var(--accent);border-radius:10px;padding:.45rem;box-shadow:0 0 14px var(--glow);}
+.nav-ico.upload-btn-nav svg{width:22px;height:22px;stroke:#fff;}
 
 /* LIGHTBOX */
-#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.98);z-index:700;align-items:center;justify-content:center;}
+#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:600;align-items:center;justify-content:center;}
 #lb.on{display:flex;}
-#lb img,#lb video{max-width:100vw;max-height:92vh;object-fit:contain;}
-.lbx{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:18px;cursor:pointer;}
+#lb img,#lb video{max-width:95vw;max-height:90vh;object-fit:contain;}
+.lbx{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:1rem;cursor:pointer;}
 
 /* SLIDESHOW */
-#ss{display:none;position:fixed;inset:0;background:#000;z-index:750;flex-direction:column;align-items:center;justify-content:center;}
+#ss{display:none;position:fixed;inset:0;background:#000;z-index:700;flex-direction:column;align-items:center;justify-content:center;}
 #ss.on{display:flex;}
-#ss img{max-width:100vw;max-height:86vh;object-fit:contain;}
+#ss img{max-width:100vw;max-height:85vh;object-fit:contain;}
 .sinfo{position:absolute;bottom:2.5rem;left:0;right:0;text-align:center;}
-.swho{font-size:14px;letter-spacing:4px;color:var(--accent);font-weight:700;}
-.scnt{font-size:13px;color:#555;margin-top:3px;}
-.sx{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:18px;cursor:pointer;}
+.swho{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:4px;color:var(--accent);}
+.scnt{font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px;}
+.sx{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:1rem;cursor:pointer;}
 .sprog{position:absolute;bottom:0;left:0;height:3px;background:var(--accent);}
 
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:#222;border-radius:12px;padding:10px 20px;font-size:15px;z-index:9999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
+#toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a2e;border:1px solid var(--border);border-radius:12px;padding:.55rem 1.2rem;font-size:.82rem;z-index:9999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
 #toast.on{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -191,25 +193,67 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
 <canvas id="bgCanvas"></canvas>
 
 <div id="loadingScreen">
-  <div class="load-logo">PARTY<span>FOTOS</span></div>
+  <div class="load-logo">PARTY<br><span>FOTOS</span></div>
   <div class="load-dots"><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div></div>
 </div>
 
 <div id="appScreen">
+
+  <!-- HEADER -->
   <header class="app-header">
     <div class="header-logo" id="headerLogo">PARTY FOTOS</div>
     <div class="header-icons">
-      <button class="hico" onclick="toggleSS()">
+      <button class="hico" onclick="toggleSS()" title="Slideshow">
         <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
       </button>
-      <button class="hico" onclick="openUpload()">
+      <button class="hico" onclick="openUpload()" title="Subir foto">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       </button>
     </div>
   </header>
 
+  <!-- STORIES / UPLOAD ROW -->
+  <div class="stories-row">
+    <div class="story-item" onclick="openUpload()">
+      <div class="story-ring add">
+        <div class="story-inner">➕</div>
+      </div>
+      <div class="story-label">Tu foto</div>
+    </div>
+    <div id="storiesContainer"></div>
+  </div>
+
+  <!-- FEED -->
   <div class="feed" id="feed">
     <div class="empty-feed"><div class="ei">📸</div><p>Se el primero en subir una foto!</p></div>
+  </div>
+
+</div>
+
+<!-- UPLOAD MODAL -->
+<div id="uploadModal" onclick="modalBgClick(event)">
+  <div class="upload-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Compartir foto o video</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div class="upzone" id="upzone" style="margin:0;padding:20px 10px;position:relative;">
+        <input type="file" id="fi" accept="image/*,video/*" multiple onchange="hf(this.files)"/>
+        <div class="up-icon">&#128444;&#65039;</div>
+        <div class="up-txt" style="font-size:14px;">Galeria</div>
+        <div class="up-sub">Fotos y videos</div>
+      </div>
+      <div class="upzone" style="margin:0;padding:20px 10px;cursor:pointer;" onclick="document.getElementById('fiCam').click()">
+        <div class="up-icon">&#128247;</div>
+        <div class="up-txt" style="font-size:14px;">Camara</div>
+        <div class="up-sub">Sacar foto ahora</div>
+      </div>
+    </div>
+    <input type="file" id="fiCam" accept="image/*" capture="environment" style="display:none" onchange="hf(this.files)"/>
+    <div class="prevs" id="prevs"></div>
+    <input class="ni" id="un" placeholder="Tu nombre..." maxlength="25"/>
+    <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+    <div class="pst" id="pst"></div>
+    <button class="ubtn" id="ubtn" onclick="uploadAll()" disabled>COMPARTIR</button>
   </div>
 </div>
 
@@ -218,57 +262,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
   <button class="nav-ico" onclick="scrollToTop()">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
   </button>
-  <button class="nav-ico add" onclick="openUpload()">
+  <button class="nav-ico upload-btn-nav" onclick="openUpload()">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
   <button class="nav-ico" onclick="toggleSS()">
     <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
   </button>
-</div>
-
-<!-- UPLOAD MODAL -->
-<div id="uploadModal" onclick="modalBg(event)">
-  <div class="up-sheet">
-    <div class="up-handle"></div>
-    <div class="up-title">Compartir momento</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-      <div class="upzone" style="margin:0;padding:20px 10px;position:relative;">
-        <input type="file" id="fi" accept="image/*,video/*" multiple onchange="hf(this.files)"/>
-        <div class="up-icon">🖼️</div>
-        <div class="up-txt" style="font-size:14px;">Galería</div>
-        <div class="up-sub">Fotos y videos</div>
-      </div>
-      <div class="upzone" style="margin:0;padding:20px 10px;position:relative;" onclick="openCamera()">
-        <div class="up-icon">📷</div>
-        <div class="up-txt" style="font-size:14px;">Cámara</div>
-        <div class="up-sub">Sacar foto ahora</div>
-      </div>
-    </div>
-    <!-- Camera input hidden -->
-    <input type="file" id="fiCam" accept="image/*" capture="environment" style="display:none" onchange="hf(this.files)"/>
-    <div class="prevs" id="prevs"></div>
-    <input class="ni" id="un" placeholder="Tu nombre..." maxlength="25"/>
-    <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
-    <div class="pst" id="pst"></div>
-    <button class="ubtn" id="ubtn" onclick="uploadAll()" disabled>PUBLICAR</button>
-  </div>
-</div>
-
-<!-- COMMENTS MODAL -->
-<div id="cmtModal" onclick="cmtModalBg(event)">
-  <div class="cmt-sheet">
-    <div class="cmt-sheet-header">
-      <div class="cmt-sheet-title">Comentarios</div>
-      <button class="cmt-close" onclick="closeCmts()">✕</button>
-    </div>
-    <div id="cmtPhoto" style="width:100%;background:#000;max-height:280px;overflow:hidden;flex-shrink:0;"></div>
-    <div class="cmt-list" id="cmtList"></div>
-    <div class="cmt-input-bar">
-      <div class="cmt-inp-avatar" id="cmtAvatar">?</div>
-      <input class="cmt-inp" id="cmtInp" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleCmtSend(this.value)"/>
-      <button class="cmt-inp-send" id="cmtSend" onclick="submitCmt()">Publicar</button>
-    </div>
-  </div>
 </div>
 
 <!-- LIGHTBOX -->
@@ -292,103 +291,133 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script>
 var CN='dkkqyl4km', UP='party_upload';
-var FC={apiKey:"AIzaSyAKzHGUhQh_dUVbkRVKeCpsIBNAlvT6zU8",authDomain:"masuno-b1ce3.firebaseapp.com",projectId:"masuno-b1ce3",storageBucket:"masuno-b1ce3.firebasestorage.app",messagingSenderId:"701219611332",appId:"1:701219611332:web:732c60dc1fcfcbaecadf91"};
+var FC={
+  apiKey:"AIzaSyAKzHGUhQh_dUVbkRVKeCpsIBNAlvT6zU8",
+  authDomain:"masuno-b1ce3.firebaseapp.com",
+  projectId:"masuno-b1ce3",
+  storageBucket:"masuno-b1ce3.firebasestorage.app",
+  messagingSenderId:"701219611332",
+  appId:"1:701219611332:web:732c60dc1fcfcbaecadf91"
+};
 firebase.initializeApp(FC);
 var db=firebase.firestore();
-var pid='',sf=[],media=[],ssTimer=null,ssIdx=0,unsub=null;
-var myName=localStorage.getItem('pUN')||'';
-var activeCmtId='';
+var pid='', sf=[], media=[], ssTimer=null, ssIdx=0, unsub=null;
+var myName = localStorage.getItem('partyUserName') || '';
 
-/* CANVAS */
+/* CANVAS BG */
 var cv=document.getElementById('bgCanvas'),cx=cv.getContext('2d');
 var beams=[],ptcls=[],crowd=[];
 function resize(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
 window.addEventListener('resize',function(){resize();initCrowd();});resize();
-function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255];}
+function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
 function cssV(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
-function initBeams(){beams=[];for(var i=0;i<8;i++)beams.push({x:cv.width*(i/7+.05),ba:-Math.PI/2+(Math.random()-.5)*.5,sw:.3+Math.random()*.25,sp:.0015+Math.random()*.002,of:Math.random()*Math.PI*2,w:30+Math.random()*60,cv:['--b1','--b2','--b3','--b4'][i%4]});}
-function initPtcls(){ptcls=[];for(var i=0;i<70;i++)ptcls.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:.8+Math.random()*2,vx:(Math.random()-.5)*.3,vy:-.1-Math.random()*.4,a:Math.random(),cv:['--b1','--b2','--b3','--b4'][Math.floor(Math.random()*4)]});}
+function initBeams(){beams=[];for(var i=0;i<9;i++)beams.push({x:cv.width*(i/8+.05),ba:-Math.PI/2+(Math.random()-.5)*.5,sw:.35+Math.random()*.25,sp:.0015+Math.random()*.002,of:Math.random()*Math.PI*2,w:35+Math.random()*70,cv:['--b1','--b2','--b3','--b4'][i%4]});}
+function initPtcls(){ptcls=[];for(var i=0;i<80;i++)ptcls.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:.8+Math.random()*2,vx:(Math.random()-.5)*.3,vy:-.1-Math.random()*.4,a:Math.random(),cv:['--b1','--b2','--b3','--b4'][Math.floor(Math.random()*4)]});}
 function initCrowd(){crowd=[];var n=Math.max(5,Math.floor(cv.width/80));for(var i=0;i<n;i++)crowd.push({x:cv.width*(i/(n-1))+(-15+Math.random()*30),ph:Math.random()*Math.PI*2,sp:.025+Math.random()*.02,sc:.6+Math.random()*.5});}
-function drawP(x,y,sc,ph){cx.save();cx.translate(x,y);cx.scale(sc,sc);var sw=Math.sin(ph)*7,ar=Math.abs(Math.sin(ph));cx.beginPath();cx.arc(sw*.3,-62,9,0,Math.PI*2);cx.moveTo(sw*.3,-53);cx.lineTo(sw*.2,-22);cx.moveTo(sw*.2,-42);cx.lineTo(sw*.2-22,-42-ar*28);cx.moveTo(sw*.2,-42);cx.lineTo(sw*.2+22,-42-ar*22);cx.moveTo(sw*.2,-22);cx.lineTo(sw*.1-9,2);cx.moveTo(sw*.2,-22);cx.lineTo(sw*.1+9,2);cx.strokeStyle='rgba(255,255,255,.1)';cx.lineWidth=2.5;cx.lineCap='round';cx.stroke();cx.restore();}
+function drawPerson(x,y,sc,ph){cx.save();cx.translate(x,y);cx.scale(sc,sc);var sw=Math.sin(ph)*7,ar=Math.abs(Math.sin(ph));cx.beginPath();cx.arc(sw*.3,-62,9,0,Math.PI*2);cx.moveTo(sw*.3,-53);cx.lineTo(sw*.2,-22);cx.moveTo(sw*.2,-42);cx.lineTo(sw*.2-22,-42-ar*28);cx.moveTo(sw*.2,-42);cx.lineTo(sw*.2+22,-42-ar*22);cx.moveTo(sw*.2,-22);cx.lineTo(sw*.1-9,2);cx.moveTo(sw*.2,-22);cx.lineTo(sw*.1+9,2);cx.strokeStyle='rgba(255,255,255,.12)';cx.lineWidth=2.5;cx.lineCap='round';cx.stroke();cx.restore();}
 function animate(){
   requestAnimationFrame(animate);cx.clearRect(0,0,cv.width,cv.height);
   var t=Date.now()*.001;
-  beams.forEach(function(b){var angle=b.ba+Math.sin(t*b.sp*60+b.of)*b.sw;var rgb=[180,0,255];try{rgb=hexRgb(cssV(b.cv)||'#b400ff');}catch(e){}var g=cx.createLinearGradient(b.x,cv.height,b.x+Math.cos(angle)*cv.height*3,cv.height+Math.sin(angle)*cv.height*3);g.addColorStop(0,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.08)');g.addColorStop(1,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',0)');cx.save();cx.translate(b.x,cv.height);cx.rotate(angle+Math.PI/2);cx.fillStyle=g;cx.fillRect(-b.w/2,-cv.height*3,b.w,cv.height*3);cx.restore();});
-  var ar=[180,0,255];try{ar=hexRgb(cssV('--accent')||'#b400ff');}catch(e){}
-  var gg=cx.createLinearGradient(0,cv.height*.8,0,cv.height);gg.addColorStop(0,'rgba('+ar[0]+','+ar[1]+','+ar[2]+',0)');gg.addColorStop(1,'rgba('+ar[0]+','+ar[1]+','+ar[2]+',.07)');cx.fillStyle=gg;cx.fillRect(0,cv.height*.8,cv.width,cv.height*.2);
-  crowd.forEach(function(p){p.ph+=p.sp;drawP(p.x,cv.height,p.sc,p.ph);});
-  ptcls.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.a+=(Math.random()-.5)*.05;p.a=Math.max(.04,Math.min(.9,p.a));if(p.y<-5){p.y=cv.height+5;p.x=Math.random()*cv.width;}var rgb=[180,0,255];try{rgb=hexRgb(cssV(p.cv)||'#b400ff');}catch(e){}cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+p.a+')';cx.fill();});
+  beams.forEach(function(b){
+    var angle=b.ba+Math.sin(t*b.sp*60+b.of)*b.sw;
+    var rgb=[180,0,255];try{rgb=hexRgb(cssV(b.cv)||'#b400ff');}catch(e){}
+    var g=cx.createLinearGradient(b.x,cv.height,b.x+Math.cos(angle)*cv.height*3,cv.height+Math.sin(angle)*cv.height*3);
+    g.addColorStop(0,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.09)');g.addColorStop(1,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',0)');
+    cx.save();cx.translate(b.x,cv.height);cx.rotate(angle+Math.PI/2);cx.fillStyle=g;cx.fillRect(-b.w/2,-cv.height*3,b.w,cv.height*3);cx.restore();
+  });
+  var acRgb=[180,0,255];try{acRgb=hexRgb(cssV('--accent')||'#b400ff');}catch(e){}
+  var gg=cx.createLinearGradient(0,cv.height*.8,0,cv.height);
+  gg.addColorStop(0,'rgba('+acRgb[0]+','+acRgb[1]+','+acRgb[2]+',0)');
+  gg.addColorStop(1,'rgba('+acRgb[0]+','+acRgb[1]+','+acRgb[2]+',.08)');
+  cx.fillStyle=gg;cx.fillRect(0,cv.height*.8,cv.width,cv.height*.2);
+  crowd.forEach(function(p){p.ph+=p.sp;drawPerson(p.x,cv.height,p.sc,p.ph);});
+  ptcls.forEach(function(p){
+    p.x+=p.vx;p.y+=p.vy;p.a+=(Math.random()-.5)*.05;p.a=Math.max(.04,Math.min(.9,p.a));
+    if(p.y<-5){p.y=cv.height+5;p.x=Math.random()*cv.width;}
+    var rgb=[180,0,255];try{rgb=hexRgb(cssV(p.cv)||'#b400ff');}catch(e){}
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+p.a+')';cx.fill();
+  });
 }
 
 /* INIT */
-window.onload=function(){
+window.onload = function() {
   initBeams();initPtcls();initCrowd();animate();
-  if(myName){document.getElementById('un').value=myName;var ini=myName[0].toUpperCase();document.getElementById('cmtAvatar').textContent=ini;}
-  function showApp(){
-    document.getElementById('loadingScreen').style.display='none';
-    document.getElementById('appScreen').style.display='block';
-    if(pid)loadFeed();
-  }
-  // Timeout fallback — show app after 4s no matter what
-  var appShown=false;
-  var fallback=setTimeout(function(){if(!appShown){appShown=true;showApp();}},4000);
-
-  db.collection('config').doc('party').get().then(function(doc){
-    if(doc.exists){
-      var d=doc.data();pid=d.partyId||'';
-      var theme=d.theme||'tomorrow';
-      document.documentElement.dataset.theme=theme==='tomorrow'?'':theme;
-      if(d.color){
-        document.documentElement.style.setProperty('--accent',d.color);
-        var rgb=[180,0,255];try{rgb=hexRgb(d.color);}catch(e){}
+  if(myName) document.getElementById('un').value = myName;
+  db.collection('config').doc('party').get().then(function(doc) {
+    if(doc.exists) {
+      var d = doc.data();
+      pid = d.partyId || '';
+      var theme = d.theme || 'tomorrow';
+      document.documentElement.dataset.theme = theme==='tomorrow' ? '' : theme;
+      if(d.color) {
+        document.documentElement.style.setProperty('--accent', d.color);
+        var rgb = [180,0,255];try{rgb=hexRgb(d.color);}catch(e){}
         document.documentElement.style.setProperty('--glow','rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.45)');
       }
-      document.getElementById('headerLogo').textContent=(d.name||'PARTY FOTOS').toUpperCase();
-      document.title=d.name||'Party Fotos';
+      var logo = d.name ? d.name.toUpperCase() : 'PARTY FOTOS';
+      document.getElementById('headerLogo').textContent = logo;
+      document.title = d.name || 'Party Fotos';
     }
-    if(!appShown){appShown=true;clearTimeout(fallback);setTimeout(showApp,600);}
+    setTimeout(function(){
+      document.getElementById('loadingScreen').style.display='none';
+      document.getElementById('appScreen').style.display='block';
+      if(pid) loadFeed();
+    }, 1000);
   }).catch(function(){
-    if(!appShown){appShown=true;clearTimeout(fallback);setTimeout(showApp,600);}
+    setTimeout(function(){
+      document.getElementById('loadingScreen').style.display='none';
+      document.getElementById('appScreen').style.display='block';
+    }, 1000);
   });
 };
 
-/* UPLOAD */
-function openUpload(){document.getElementById('uploadModal').classList.add('open');}
-function closeUpload(){document.getElementById('uploadModal').classList.remove('open');}
-function modalBg(e){if(e.target===document.getElementById('uploadModal'))closeUpload();}
+/* UPLOAD MODAL */
+function openUpload() { document.getElementById('uploadModal').classList.add('open'); }
+function closeUpload() { document.getElementById('uploadModal').classList.remove('open'); }
+function modalBgClick(e) { if(e.target===document.getElementById('uploadModal')) closeUpload(); }
 
-function hf(files){
-  sf=Array.from(files);
-  var prev=document.getElementById('prevs');prev.innerHTML='';
-  sf.forEach(function(f,i){var d=document.createElement('div');d.className='pthumb';var u=URL.createObjectURL(f);d.innerHTML=f.type.startsWith('video/')?'<video src="'+u+'" muted></video><button class="rm" onclick="rmf('+i+')">✕</button>':'<img src="'+u+'"><button class="rm" onclick="rmf('+i+')">✕</button>';prev.appendChild(d);});
-  document.getElementById('ubtn').disabled=!sf.length;
+function hf(files) {
+  sf = Array.from(files);
+  var prev = document.getElementById('prevs');
+  prev.innerHTML = '';
+  sf.forEach(function(f,i){
+    var d=document.createElement('div');d.className='pthumb';
+    var u=URL.createObjectURL(f);
+    d.innerHTML=f.type.startsWith('video/')?'<video src="'+u+'" muted></video><button class="rm" onclick="rmf('+i+')">x</button>':'<img src="'+u+'"><button class="rm" onclick="rmf('+i+')">x</button>';
+    prev.appendChild(d);
+  });
+  document.getElementById('ubtn').disabled = sf.length===0;
 }
-function rmf(i){sf.splice(i,1);var prev=document.getElementById('prevs');prev.innerHTML='';sf.forEach(function(f,j){var d=document.createElement('div');d.className='pthumb';var u=URL.createObjectURL(f);d.innerHTML=f.type.startsWith('video/')?'<video src="'+u+'" muted></video><button class="rm" onclick="rmf('+j+')">✕</button>':'<img src="'+u+'"><button class="rm" onclick="rmf('+j+')">✕</button>';prev.appendChild(d);});document.getElementById('ubtn').disabled=!sf.length;}
+function rmf(i){sf.splice(i,1);hf([]); /* re-render */ var dt=new DataTransfer();sf.forEach(function(f){dt.items.add(f);});document.getElementById('fi').files=dt.files; var prev=document.getElementById('prevs');prev.innerHTML='';sf.forEach(function(f,i){var d=document.createElement('div');d.className='pthumb';var u=URL.createObjectURL(f);d.innerHTML=f.type.startsWith('video/')?'<video src="'+u+'" muted></video><button class="rm" onclick="rmf('+i+')">x</button>':'<img src="'+u+'"><button class="rm" onclick="rmf('+i+')">x</button>';prev.appendChild(d);});document.getElementById('ubtn').disabled=sf.length===0;}
 
-async function uploadAll(){
-  var name=document.getElementById('un').value.trim()||'Anonimo';
-  myName=name;localStorage.setItem('pUN',name);
-  document.getElementById('cmtAvatar').textContent=name[0].toUpperCase();
+async function uploadAll() {
+  var name = document.getElementById('un').value.trim() || 'Anonimo';
+  localStorage.setItem('partyUserName', name);
   if(!sf.length){toast('Elegi al menos una foto');return;}
-  var btn=document.getElementById('ubtn');btn.disabled=true;btn.textContent='PUBLICANDO...';
+  var btn=document.getElementById('ubtn');btn.disabled=true;btn.textContent='SUBIENDO...';
   var pb=document.getElementById('pbar'),pf=document.getElementById('pfill'),ps=document.getElementById('pst');
   pb.style.display='block';ps.style.display='block';
   var done=0;
   for(var i=0;i<sf.length;i++){
-    var f=sf[i];ps.textContent='SUBIENDO '+(done+1)+' DE '+sf.length+'...';
-    try{var url=await upCloud(f,done,sf.length,function(p,d,t){pf.style.width=((d/t+p/t)*100)+'%';});await saveMeta(url,name,f.type.startsWith('video/')?'video':'image');done++;}
-    catch(e){toast('Error: '+f.name);}
+    var f=sf[i];
+    ps.textContent='SUBIENDO '+(done+1)+' DE '+sf.length+'...';
+    try{
+      var url=await upCloud(f,function(p,d,t){pf.style.width=((d/t+p/t)*100)+'%';},done,sf.length);
+      await saveMeta(url,name,f.type.startsWith('video/')?'video':'image');
+      done++;
+    }catch(e){toast('Error: '+f.name);}
   }
   pf.style.width='100%';ps.textContent='LISTO!';
   setTimeout(function(){pb.style.display='none';ps.style.display='none';pf.style.width='0%';ps.textContent='';},2000);
   sf=[];document.getElementById('prevs').innerHTML='';document.getElementById('fi').value='';
-  btn.disabled=false;btn.textContent='PUBLICAR';
-  closeUpload();toast('Foto publicada!');
+  btn.disabled=false;btn.textContent='COMPARTIR';
+  closeUpload();toast('Fotos compartidas!');
 }
 
-function upCloud(file,done,total,onP){
+function upCloud(file, onP, done, total) {
   return new Promise(function(res,rej){
-    var fd=new FormData();fd.append('file',file);fd.append('upload_preset',UP);fd.append('folder',pid||'party_default');
+    var fd=new FormData();
+    fd.append('file',file);fd.append('upload_preset',UP);fd.append('folder',pid||'party_default');
     var ep=file.type.startsWith('video/')?'https://api.cloudinary.com/v1_1/'+CN+'/video/upload':'https://api.cloudinary.com/v1_1/'+CN+'/image/upload';
     var xhr=new XMLHttpRequest();xhr.open('POST',ep);
     xhr.upload.onprogress=function(e){if(e.lengthComputable)onP(e.loaded/e.total,done,total);};
@@ -398,133 +427,169 @@ function upCloud(file,done,total,onP){
 }
 
 async function saveMeta(url,uname,type){
-  await db.collection('parties').doc(pid).collection('media').add({url:url,uploaderName:uname,type:type,likes:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await db.collection('parties').doc(pid).collection('media').add({
+    url:url,uploaderName:uname,type:type,likes:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
 }
 
 /* FEED */
 function loadFeed(){
   if(unsub)unsub();
-  unsub=db.collection('parties').doc(pid).collection('media').orderBy('createdAt','desc').onSnapshot(function(snap){
-    media=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-    renderFeed();
-  });
+  unsub=db.collection('parties').doc(pid).collection('media')
+    .orderBy('createdAt','desc')
+    .onSnapshot(function(snap){
+      media=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+      renderFeed();
+      renderStories();
+    });
 }
 
-function ini(name){return(name||'?')[0].toUpperCase();}
+function getInitial(name){return (name||'?')[0].toUpperCase();}
 
 function renderFeed(){
   var feed=document.getElementById('feed');
-  if(!media.length){feed.innerHTML='<div class="empty-feed"><div class="ei">&#128248;</div><p>Se el primero en subir una foto!</p></div>';return;}
+  if(!media.length){feed.innerHTML='<div class="empty-feed"><div class="ei">📸</div><p>Se el primero en subir una foto!</p></div>';return;}
   feed.innerHTML='';
   media.forEach(function(item,idx){
     var lkKey='l_'+pid+'_'+item.id;
     var isLiked=!!localStorage.getItem(lkKey);
     var comments=item.comments||[];
-    var cmtCount=comments.length;
     var timeStr=item.createdAt&&item.createdAt.toDate?timeAgo(item.createdAt.toDate()):'ahora';
-    var likesN=item.likes||0;
-    var post=document.createElement('div');
-    post.className='post';
-    var mediaHtml=item.type==='video'
-      ?'<div class="post-media"><video src="'+item.url+'" controls playsinline preload="metadata"></video></div>'
-      :'<div class="post-media" onclick="openLB('+idx+')" style="cursor:pointer"><img src="'+item.url+'" loading="lazy"/></div>';
-    var badge=cmtCount>0?'<span style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;">'+cmtCount+'</span>':'';
-    var likeClass=isLiked?'act-btn liked':'act-btn';
+    var likesCount=item.likes||0;
+    var post=document.createElement('div');post.className='post';
+
+    // Build comments HTML (show last 2)
+    var shownComments=comments.slice(-2);
+    var commentsHtml=shownComments.map(function(c){
+      return '<div class="comment-line"><strong>'+esc(c.name)+'</strong>'+esc(c.text)+'</div>';
+    }).join('');
+    var moreComments=comments.length>2?'<div class="view-comments" onclick="expandComments(\''+item.id+'\',this)">Ver los '+comments.length+' comentarios</div>':'';
+    var allCommentsHtml=comments.map(function(c){
+      return '<div class="comment-line"><strong>'+esc(c.name)+'</strong>'+esc(c.text)+'</div>';
+    }).join('');
+
+    var mediaHtml = item.type==='video'
+      ? '<div class="post-media"><video src="'+item.url+'" controls playsinline preload="metadata" style="width:100%;max-height:500px;object-fit:contain;background:#000;"></video></div>'
+      : '<div class="post-media" onclick="openLB('+idx+')" style="cursor:pointer"><img src="'+item.url+'" loading="lazy"/></div>';
+
     post.innerHTML=
       '<div class="post-header">'+
-        '<div class="post-avatar">'+ini(item.uploaderName)+'</div>'+
-        '<div class="post-user"><div class="post-username">'+esc(item.uploaderName||'Anonimo')+'</div><div class="post-time">'+timeStr+'</div></div>'+
-        '<button class="post-more">...</button>'+
+        '<div class="post-avatar">'+getInitial(item.uploaderName)+'</div>'+
+        '<div class="post-user">'+
+          '<div class="post-username">'+esc(item.uploaderName||'Anonimo')+'</div>'+
+          '<div class="post-time">'+timeStr+'</div>'+
+        '</div>'+
+        '<button class="post-more">···</button>'+
       '</div>'+
       mediaHtml+
       '<div class="post-actions">'+
-        '<button class="'+likeClass+'" id="lb_'+item.id+'" onclick="toggleLike(''+item.id+'',this)">'+
-          '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'+
+        '<button class="action-btn'+(isLiked?' liked':'')+'\" onclick="toggleLike(\''+item.id+'\',this)" title="Me gusta">'+
+          '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'+
         '</button>'+
-        '<button class="act-btn" onclick="openCmts(''+item.id+'')" style="position:relative">'+
-          '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
-          badge+
+        '<button class="action-btn" onclick="focusComment(\'ci_'+item.id+'\')" title="Comentar">'+
+          '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
         '</button>'+
-        '<div class="act-spacer"></div>'+
+        '<div class="action-spacer"></div>'+
       '</div>'+
-      '<div class="post-likes" id="lc_'+item.id+'">'+likesN+' '+(likesN===1?'like':'likes')+'</div>'+
+      '<div class="post-likes" id="lc_'+item.id+'">'+likesCount+' '+(likesCount===1?'like':'likes')+'</div>'+
       '<div class="post-caption"><strong>'+esc(item.uploaderName||'Anonimo')+'</strong></div>'+
-      '<div class="comment-bar">'+
-        '<div class="cbar-avatar">'+ini(myName)+'</div>'+
-        '<input class="cbar-input" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleSendInline('cs_'+item.id+'',this.value)" onkeydown="if(event.key==='Enter')sendInline(''+item.id+'',this)"/>'+
-        '<button class="cbar-send" id="cs_'+item.id+'" onclick="sendFromBar(''+item.id+'',this)">Publicar</button>'+
+      '<div class="post-comments" id="cmts_'+item.id+'">'+
+        moreComments+
+        '<div class="comments-body" id="cb_'+item.id+'" data-all=\''+JSON.stringify(allCommentsHtml)+'\'>'+commentsHtml+'</div>'+
+      '</div>'+
+      '<div class="post-comment-bar">'+
+        '<div class="comment-avatar">'+getInitial(myName||'?')+'</div>'+
+        '<input class="comment-input-ig" id="ci_'+item.id+'" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleSendBtn(\'cs_'+item.id+'\',this.value)" onkeydown="if(event.key===\'Enter\')sendComment(\''+item.id+'\',this)"/>'+
+        '<button class="comment-send-ig" id="cs_'+item.id+'" onclick="sendComment(\''+item.id+'\',document.getElementById(\'ci_'+item.id+'\'))">Publicar</button>'+
       '</div>';
     feed.appendChild(post);
   });
 }
 
-/* LIKES */
-function toggleLike(id,btn){
-  var key='l_'+pid+'_'+id,isLiked=!!localStorage.getItem(key);
-  btn.classList.toggle('liked',!isLiked);
-  if(isLiked)localStorage.removeItem(key);else localStorage.setItem(key,'1');
-  db.collection('parties').doc(pid).collection('media').doc(id).update({likes:firebase.firestore.FieldValue.increment(isLiked?-1:1)});
-  var lc=document.getElementById('lc_'+id);
-  if(lc){var n=parseInt(lc.textContent)||0;n=isLiked?n-1:n+1;lc.textContent=n+' '+(n===1?'like':'likes');}
-}
-
-/* INLINE COMMENT BAR */
-function toggleSendInline(btnId,val){var b=document.getElementById(btnId);if(b)b.classList.toggle('on',val.trim().length>0);}
-function sendFromBar(id,btn){
-  var bar=btn.closest('.comment-bar');
-  var inp=bar.querySelector('.cbar-input');
-  sendCmt(id,inp.value.trim(),function(){inp.value='';btn.classList.remove('on');});
-}
-function sendInline(id,inp){sendCmt(id,inp.value.trim(),function(){inp.value='';});}
-
-/* COMMENTS MODAL */
-function openCmts(id){
-  activeCmtId=id;
-  var item=media.find(function(m){return m.id===id;});
-  if(!item)return;
-  var comments=item.comments||[];
-    var cmtCount=comments.length;
-  var list=document.getElementById('cmtList');
-  if(!comments.length){list.innerHTML='<div class="cmt-empty">No hay comentarios aun.<br>Se el primero!</div>';}
-  else{
-    list.innerHTML='';
-    comments.forEach(function(c){
-      var d=document.createElement('div');d.className='cmt-item';
-      d.innerHTML='<div class="cmt-avatar">'+ini(c.name)+'</div><div class="cmt-body"><span class="cmt-name">'+esc(c.name)+'</span><span class="cmt-text">'+esc(c.text)+'</span></div>';
-      list.appendChild(d);
-    });
-  }
-  document.getElementById('cmtModal').classList.add('open');
-  document.getElementById('cmtInp').focus();
-}
-function closeCmts(){document.getElementById('cmtModal').classList.remove('open');activeCmtId='';}
-function cmtModalBg(e){if(e.target===document.getElementById('cmtModal'))closeCmts();}
-
-function toggleCmtSend(val){var b=document.getElementById('cmtSend');if(b)b.classList.toggle('on',val.trim().length>0);}
-
-function submitCmt(){
-  var inp=document.getElementById('cmtInp');
-  sendCmt(activeCmtId,inp.value.trim(),function(){
-    inp.value='';document.getElementById('cmtSend').classList.remove('on');
-    // Refresh comments list
-    openCmts(activeCmtId);
+function renderStories(){
+  var container=document.getElementById('storiesContainer');
+  container.innerHTML='';
+  var seen={};
+  media.forEach(function(item){
+    if(seen[item.uploaderName]) return;
+    seen[item.uploaderName]=true;
+    var div=document.createElement('div');div.className='story-item';
+    div.innerHTML='<div class="story-ring"><div class="story-inner">'+getInitial(item.uploaderName)+'</div></div>'+
+      '<div class="story-label">'+esc(item.uploaderName||'?')+'</div>';
+    container.appendChild(div);
   });
 }
 
-async function sendCmt(id,txt,cb){
-  if(!txt||!id)return;
-  var name=myName||document.getElementById('un').value.trim()||'Anonimo';
-  await db.collection('parties').doc(pid).collection('media').doc(id).update({comments:firebase.firestore.FieldValue.arrayUnion({name:name,text:txt})});
-  if(cb)cb();
+function expandComments(id, el){
+  var cb=document.getElementById('cb_'+id);
+  if(cb){cb.innerHTML=JSON.parse(cb.dataset.all);el.style.display='none';}
+}
+
+function toggleSendBtn(btnId, val){
+  var btn=document.getElementById(btnId);
+  if(btn) btn.classList.toggle('active', val.trim().length>0);
+}
+
+function focusComment(inputId){
+  var el=document.getElementById(inputId);
+  if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}
+}
+
+function toggleLike(id, btn){
+  var key='l_'+pid+'_'+id;
+  var isLiked=!!localStorage.getItem(key);
+  btn.classList.toggle('liked',!isLiked);
+  if(isLiked) localStorage.removeItem(key); else localStorage.setItem(key,'1');
+  db.collection('parties').doc(pid).collection('media').doc(id)
+    .update({likes:firebase.firestore.FieldValue.increment(isLiked?-1:1)});
+  var lc=document.getElementById('lc_'+id);
+  if(lc){
+    var n=parseInt(lc.textContent)||0;
+    n=isLiked?n-1:n+1;
+    lc.textContent=n+' '+(n===1?'like':'likes');
+  }
+}
+
+async function sendComment(id, inp){
+  var txt=inp.value.trim();
+  var name=document.getElementById('un').value.trim()||myName||'Anonimo';
+  if(!txt)return;inp.value='';
+  var btn=document.getElementById('cs_'+id);if(btn)btn.classList.remove('active');
+  await db.collection('parties').doc(pid).collection('media').doc(id)
+    .update({comments:firebase.firestore.FieldValue.arrayUnion({name:name,text:txt})});
 }
 
 /* LIGHTBOX */
-function openLB(idx){var it=media[idx];var lbi=document.getElementById('lbi'),lbv=document.getElementById('lbv');if(it.type==='video'){lbv.src=it.url;lbv.style.display='block';lbi.style.display='none';lbv.play();}else{lbi.src=it.url;lbi.style.display='block';lbv.style.display='none';}document.getElementById('lb').classList.add('on');}
+function openLB(idx){
+  var it=media[idx];
+  var lbi=document.getElementById('lbi'),lbv=document.getElementById('lbv');
+  if(it.type==='video'){lbv.src=it.url;lbv.style.display='block';lbi.style.display='none';lbv.play();}
+  else{lbi.src=it.url;lbi.style.display='block';lbv.style.display='none';}
+  document.getElementById('lb').classList.add('on');
+}
 function closeLB(){document.getElementById('lb').classList.remove('on');document.getElementById('lbv').pause();}
 
 /* SLIDESHOW */
-function toggleSS(){var s=document.getElementById('ss');if(s.classList.contains('on')){stopSS();return;}var ph=media.filter(function(m){return m.type==='image';});if(!ph.length){toast('No hay fotos aun');return;}s.classList.add('on');ssIdx=0;showSlide();}
-function showSlide(){var ph=media.filter(function(m){return m.type==='image';});if(!ph.length){stopSS();return;}ssIdx=ssIdx%ph.length;var it=ph[ssIdx];document.getElementById('si').src=it.url;document.getElementById('sw').textContent=(it.uploaderName||'Anonimo').toUpperCase();document.getElementById('sc').textContent=(ssIdx+1)+' / '+ph.length;var sp=document.getElementById('sp');sp.style.transition='none';sp.style.width='0%';setTimeout(function(){sp.style.transition='width 5s linear';sp.style.width='100%';},50);if(ssTimer)clearTimeout(ssTimer);ssTimer=setTimeout(function(){ssIdx++;showSlide();},5000);}
+function toggleSS(){
+  var s=document.getElementById('ss');
+  if(s.classList.contains('on')){stopSS();return;}
+  var ph=media.filter(function(m){return m.type==='image';});
+  if(!ph.length){toast('No hay fotos aun');return;}
+  s.classList.add('on');ssIdx=0;showSlide();
+}
+function showSlide(){
+  var ph=media.filter(function(m){return m.type==='image';});
+  if(!ph.length){stopSS();return;}
+  ssIdx=ssIdx%ph.length;var it=ph[ssIdx];
+  document.getElementById('si').src=it.url;
+  document.getElementById('sw').textContent=(it.uploaderName||'Anonimo').toUpperCase();
+  document.getElementById('sc').textContent=(ssIdx+1)+' / '+ph.length;
+  var sp=document.getElementById('sp');
+  sp.style.transition='none';sp.style.width='0%';
+  setTimeout(function(){sp.style.transition='width 5s linear';sp.style.width='100%';},50);
+  if(ssTimer)clearTimeout(ssTimer);
+  ssTimer=setTimeout(function(){ssIdx++;showSlide();},5000);
+}
 function stopSS(){document.getElementById('ss').classList.remove('on');if(ssTimer){clearTimeout(ssTimer);ssTimer=null;}}
 
 /* HELPERS */
@@ -533,14 +598,76 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 function timeAgo(d){var s=Math.floor((Date.now()-d)/1000);if(s<60)return'hace '+s+'s';if(s<3600)return'hace '+Math.floor(s/60)+'m';if(s<86400)return'hace '+Math.floor(s/3600)+'h';return'hace '+Math.floor(s/86400)+'d';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function openCamera(){
-  document.getElementById('fiCam').click();
-}
-
 var uz=document.getElementById('upzone');
-if(uz){uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('dov');});uz.addEventListener('dragleave',function(){uz.classList.remove('dov');});uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('dov');hf(e.dataTransfer.files);});}
+if(uz){
+  uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('dov');});
+  uz.addEventListener('dragleave',function(){uz.classList.remove('dov');});
+  uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('dov');hf(e.dataTransfer.files);});
+}
+</script>
 
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+<div id="cmtModal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.7);align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeCmts()">
+  <div style="background:#1a1a1a;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;border-top:1px solid #333;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #333;flex-shrink:0;">
+      <div style="font-size:17px;font-weight:700;">Comentarios</div>
+      <button onclick="closeCmts()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;">&#x2715;</button>
+    </div>
+    <div id="cmtPhoto" style="width:100%;background:#000;flex-shrink:0;max-height:260px;overflow:hidden;"></div>
+    <div id="cmtList" style="flex:1;overflow-y:auto;padding:8px 0;min-height:80px;"></div>
+    <div style="display:flex;align-items:center;padding:10px 14px 28px;gap:10px;border-top:1px solid #333;flex-shrink:0;">
+      <div id="cmtAvatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));flex-shrink:0;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;">?</div>
+      <input id="cmtInp" style="flex:1;background:#262626;border:none;border-radius:22px;padding:10px 16px;color:#fff;font-size:15px;outline:none;font-family:inherit;" placeholder="Agrega un comentario..." maxlength="150" oninput="document.getElementById('cmtSend').style.opacity=this.value.trim().length?'1':'.4'" onkeydown="if(event.key==='Enter')submitCmt()"/>
+      <button id="cmtSend" onclick="submitCmt()" style="background:none;border:none;color:var(--accent);font-size:15px;font-weight:700;cursor:pointer;opacity:.4;white-space:nowrap;">Publicar</button>
+    </div>
+  </div>
+</div>
+<script>
+var activeCmtId='';
+function openCmts(id){
+  activeCmtId=id;
+  var item=media.find(function(m){return m.id===id;});
+  if(!item)return;
+  var photoEl=document.getElementById('cmtPhoto');
+  photoEl.innerHTML=item.type==='video'
+    ?'<video src="'+item.url+'" controls playsinline style="width:100%;max-height:260px;object-fit:contain;background:#000;display:block;"></video>'
+    :'<img src="'+item.url+'" style="width:100%;max-height:260px;object-fit:contain;background:#000;display:block;"/>';
+  var comments=item.comments||[];
+  var list=document.getElementById('cmtList');
+  if(!comments.length){
+    list.innerHTML='<div style="text-align:center;padding:2rem 1rem;color:#555;font-size:15px;">Sin comentarios aun. Se el primero!</div>';
+  } else {
+    list.innerHTML='';
+    comments.forEach(function(c){
+      var d=document.createElement('div');
+      d.style.cssText='display:flex;align-items:flex-start;padding:10px 16px;gap:10px;';
+      d.innerHTML='<div style="width:36px;height:36px;min-width:36px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;">'+String(c.name||'?')[0].toUpperCase()+'</div>'+
+        '<div style="font-size:15px;line-height:1.5;"><strong>'+String(c.name).replace(/</g,'&lt;')+'</strong> '+String(c.text).replace(/</g,'&lt;')+'</div>';
+      list.appendChild(d);
+    });
+  }
+  document.getElementById('cmtModal').style.display='flex';
+  var name=(document.getElementById('un').value.trim()||myName||'?')[0].toUpperCase();
+  document.getElementById('cmtAvatar').textContent=name;
+  setTimeout(function(){document.getElementById('cmtInp').focus();},300);
+}
+function closeCmts(){
+  document.getElementById('cmtModal').style.display='none';
+  activeCmtId='';
+  document.getElementById('cmtInp').value='';
+  document.getElementById('cmtSend').style.opacity='.4';
+}
+function submitCmt(){
+  var inp=document.getElementById('cmtInp');
+  var txt=inp.value.trim();
+  if(!txt||!activeCmtId)return;
+  var name=document.getElementById('un').value.trim()||myName||'Anonimo';
+  db.collection('parties').doc(pid).collection('media').doc(activeCmtId)
+    .update({comments:firebase.firestore.FieldValue.arrayUnion({name:name,text:txt})});
+  inp.value='';
+  document.getElementById('cmtSend').style.opacity='.4';
+  var item=media.find(function(m){return m.id===activeCmtId;});
+  if(item){if(!item.comments)item.comments=[];item.comments.push({name:name,text:txt});openCmts(activeCmtId);}
+}
 </script>
 </body>
 </html>
