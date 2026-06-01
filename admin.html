@@ -131,6 +131,11 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
       <div class="afield"><div class="alabel">NOMBRE</div><input class="ainput" id="cfgName" placeholder="Ej: Noche Electrica..." maxlength="40" oninput="livePreview()"/></div>
       <div class="afield"><div class="alabel">CUMPLEANERO/A</div><input class="ainput" id="cfgHost" placeholder="Nombre..." maxlength="30" oninput="livePreview()"/></div>
       <div class="afield"><div class="alabel">URL DE LA APP</div><input class="ainput" id="cfgUrl" placeholder="https://party-40.vercel.app"/></div>
+      <div class="afield">
+        <div class="alabel">FECHA Y HORA DEL EVENTO</div>
+        <input class="ainput" id="cfgDate" type="datetime-local"/>
+        <div style="font-family:monospace;font-size:.6rem;color:#444;margin-top:4px;">Si configurás una fecha, los invitados verán una cuenta regresiva hasta ese momento</div>
+      </div>
       <button class="save-btn" id="saveBtn" onclick="saveConfig()">GUARDAR TODO</button>
       <div class="save-fb" id="saveFb"></div>
     </div>
@@ -288,6 +293,7 @@ function loadConfig(){
       if(d.name)document.getElementById('cfgName').value=d.name;
       if(d.host)document.getElementById('cfgHost').value=d.host;
       if(d.url)document.getElementById('cfgUrl').value=d.url;
+      if(d.eventDate)document.getElementById('cfgDate').value=d.eventDate;
       if(d.theme){curTheme=d.theme;document.querySelectorAll('.topt').forEach(function(o){o.classList.toggle('on',o.dataset.t===d.theme);});}
       if(d.color){curColor=d.color;document.querySelectorAll('.cchip').forEach(function(c){c.classList.toggle('on',c.dataset.c===d.color);});}
       curPid=d.partyId||('party_'+Date.now());
@@ -308,7 +314,8 @@ function saveConfig(){
   if(!curPid)curPid='party_'+Date.now();
   var btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='GUARDANDO...';
-  db.collection('config').doc('party').set({name:name,host:host,url:url,theme:curTheme,color:curColor,partyId:curPid})
+  var eventDate=document.getElementById('cfgDate').value||'';
+  db.collection('config').doc('party').set({name:name,host:host,url:url,theme:curTheme,color:curColor,partyId:curPid,eventDate:eventDate})
     .then(function(){showFb('GUARDADO',false);showToast('Guardado!');livePreview();})
     .catch(function(){showFb('ERROR',true);})
     .finally(function(){btn.disabled=false;btn.textContent='GUARDAR TODO';});
