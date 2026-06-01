@@ -509,22 +509,26 @@ function loadBanned() {
 }
 
 function renderUsers() {
-  // Combine registered users + uploaders
+  // Combine presence users + uploaders + registered
   var users = {};
   registeredUsers.forEach(function(n){ if(n) users[n]=true; });
   allItems.forEach(function(item){ if(item.uploaderName) users[item.uploaderName]=true; });
-  var container = document.getElementById('usersList');
-  if (!container) return;
-  var names = Object.keys(users);
-  if (!names.length) { container.innerHTML='<div style="color:#444;font-size:.7rem;font-family:monospace;">No hay usuarios aun</div>'; return; }
-  container.innerHTML = '';
-  names.forEach(function(name) {
-    var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
-    var chip = document.createElement('div');
-    chip.className = 'user-chip' + (isBanned?' banned':'');
-    chip.innerHTML = '<span class="chip-dot"></span>' + name + (isBanned?' &#128683;':' &#10003;');
-    chip.onclick = function(){ toggleBan(name); };
-    container.appendChild(chip);
+  // Also add from presence
+  db.collection('presence').get().then(function(snap){
+    snap.forEach(function(doc){ if(doc.data().name) users[doc.data().name]=true; });
+    var container = document.getElementById('usersList');
+    if (!container) return;
+    var names = Object.keys(users).filter(function(n){ return n && n.trim(); });
+    if (!names.length) { container.innerHTML='<div style="color:#444;font-size:.7rem;font-family:monospace;">No hay usuarios aun</div>'; return; }
+    container.innerHTML = '';
+    names.forEach(function(name) {
+      var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
+      var chip = document.createElement('div');
+      chip.className = 'user-chip' + (isBanned?' banned':'');
+      chip.innerHTML = '<span class="chip-dot"></span>' + name + (isBanned?' &#128683;':' &#10003;');
+      chip.onclick = function(){ toggleBan(name); };
+      container.appendChild(chip);
+    });
   });
 }
 
