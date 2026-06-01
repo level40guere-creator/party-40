@@ -538,29 +538,27 @@ function renderUsers() {
 
 function toggleBan(name, chip) {
   var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
-  if (isBanned) {
-    // Unban name and device
-    bannedList = bannedList.filter(function(b){ return b.toLowerCase()!==name.toLowerCase(); });
-    // Find and remove device
-    db.collection('presence').where('name','==',name).get().then(function(snap){
-      snap.forEach(function(doc){
-        var devId = doc.data().deviceId;
-        if(devId) bannedDevices = bannedDevices.filter(function(d){ return d!==devId; });
-      });
-      saveBanned(name + ' desbloqueado');
-    }).catch(function(){ saveBanned(name + ' desbloqueado'); });
-  } else {
-    // Ban name and device
-    bannedList.push(name);
-    // Find device ID from presence
-    db.collection('presence').where('name','==',name).get().then(function(snap){
-      snap.forEach(function(doc){
-        var devId = doc.data().deviceId;
-        if(devId && bannedDevices.indexOf(devId)<0) bannedDevices.push(devId);
-      });
-      saveBanned(name + ' bloqueado (nombre + dispositivo)');
-    }).catch(function(){ saveBanned(name + ' bloqueado'); });
-  }
+  // Get device ID from presence doc
+  db.collection('presence').doc(name).get().then(function(doc) {
+    var devId = doc.exists ? (doc.data().deviceId||null) : null;
+    if (isBanned) {
+      bannedList = bannedList.filter(function(b){ return b.toLowerCase()!==name.toLowerCase(); });
+      if(devId) bannedDevices = bannedDevices.filter(function(d){ return d!==devId; });
+      saveBanned(name + ' desbloqueado ✓');
+    } else {
+      bannedList.push(name);
+      if(devId && bannedDevices.indexOf(devId)<0) bannedDevices.push(devId);
+      saveBanned(name + ' bloqueado (nombre + dispositivo) 🚫');
+    }
+  }).catch(function(){
+    if(isBanned) {
+      bannedList = bannedList.filter(function(b){ return b.toLowerCase()!==name.toLowerCase(); });
+      saveBanned(name + ' desbloqueado ✓');
+    } else {
+      bannedList.push(name);
+      saveBanned(name + ' bloqueado 🚫');
+    }
+  });
 }
 
 function saveBanned(msg) {

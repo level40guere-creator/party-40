@@ -339,31 +339,30 @@ function doLogout() {
   if(unsub){ unsub(); unsub=null; }
 }
 
+function checkAccess(name, cb) {
+  db.collection('config').doc('banned').get().then(function(doc) {
+    if(!doc.exists) { cb(true); return; }
+    var d = doc.data();
+    var bannedNames  = d.names   || [];
+    var bannedDevs   = d.devices || [];
+    var nameBanned   = bannedNames.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
+    var deviceBanned = bannedDevs.indexOf(deviceId) >= 0;
+    cb(!nameBanned && !deviceBanned);
+  }).catch(function(){ cb(true); });
+}
+
 function doLogin() {
   var name = document.getElementById('loginName').value.trim();
   if(name.length < 2) return;
-  db.collection('config').doc('banned').get().then(function(doc) {
-    var banned = doc.exists ? (doc.data().names || []) : [];
-    var isBanned = banned.some(function(b){ return b.toLowerCase() === name.toLowerCase(); });
-    if(isBanned) {
+  checkAccess(name, function(allowed) {
+    if(!allowed) {
       document.getElementById('loginBanned').style.display = 'block';
       return;
     }
     myName = name;
     localStorage.setItem('partyUserName', name);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('bgCanvas').style.display = 'block';
-    document.body.classList.remove('locked');
-    startApp();
-  }).catch(function(){
-    // If banned doc doesn't exist, just let them in
-    myName = name;
-    localStorage.setItem('partyUserName', name);
-    // Register user presence in Firestore
     db.collection('presence').doc(name).set({
-      name: name,
-      deviceId: deviceId,
-      online: true,
+      name: name, deviceId: deviceId, online: true,
       lastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }).catch(function(){});
     document.getElementById('loginScreen').style.display = 'none';
@@ -392,9 +391,9 @@ function startApp() {
   db.collection('config').doc('banned').onSnapshot(function(doc) {
     if(!myName) return;
     var banned = doc.exists ? (doc.data().names||[]) : [];
-    var bannedDevices = doc.exists ? (doc.data().devices||[]) : [];
+    var bannedDevs = doc.exists ? (doc.data().devices||[]) : [];
     var isBanned = banned.some(function(b){ return b.toLowerCase()===myName.toLowerCase(); });
-    var isDeviceBanned = bannedDevices.indexOf(deviceId) >= 0;
+    var isDeviceBanned = bannedDevs.indexOf(deviceId) >= 0;
     if(isBanned || isDeviceBanned) {
       // Mark offline
       db.collection('presence').doc(myName).set({name:myName,online:false,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
@@ -445,31 +444,19 @@ window.onload = function() {
   document.body.classList.add('locked');
   var saved = localStorage.getItem('partyUserName');
   if(saved) {
-    db.collection('config').doc('banned').get().then(function(doc){
-      var banned = doc.exists ? (doc.data().names||[]) : [];
-      var bannedDevices = doc.exists ? (doc.data().devices||[]) : [];
-      var isBanned = banned.some(function(b){ return b.toLowerCase()===saved.toLowerCase(); });
-      var isDeviceBanned = bannedDevices.indexOf(deviceId) >= 0;
-      if(isBanned || isDeviceBanned) {
+    checkAccess(saved, function(allowed) {
+      if(!allowed) {
         localStorage.removeItem('partyUserName');
         document.getElementById('loginScreen').style.display = 'flex';
+        document.body.classList.add('locked');
       } else {
         myName = saved;
-        // Register presence
         db.collection('presence').doc(saved).set({name:saved,deviceId:deviceId,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('bgCanvas').style.display = 'block';
         document.body.classList.remove('locked');
         startApp();
       }
-    }).catch(function(){
-      myName = saved;
-      // Register presence
-      db.collection('presence').doc(saved).set({name:saved,deviceId:deviceId,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('bgCanvas').style.display = 'block';
-      document.body.classList.remove('locked');
-      startApp();
     });
   } else {
     document.getElementById('loginScreen').style.display = 'flex';
