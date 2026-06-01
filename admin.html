@@ -273,6 +273,7 @@ var unsub = null;
 var allItems = [];
 var selIds = [];
 var bannedList = [];
+var bannedDevices = [];
 
 var THEMES = {
   tomorrow: 'linear-gradient(135deg,#0d0d2b,#1a0533,#2d0a4e)',
@@ -495,6 +496,7 @@ function loadBanned() {
   // Load banned list
   db.collection('config').doc('banned').get().then(function(doc) {
     bannedList = doc.exists ? (doc.data().names||[]) : [];
+    bannedDevices = doc.exists ? (doc.data().devices||[]) : [];
     // Load registered users
     db.collection('config').doc('users').get().then(function(udoc) {
       registeredUsers = udoc.exists ? (udoc.data().names||[]) : [];
@@ -525,26 +527,44 @@ function renderUsers() {
       var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
       var chip = document.createElement('div');
       chip.className = 'user-chip' + (isBanned?' banned':'');
+      var devId = null;
+      // Find device ID for this user from presence
       chip.innerHTML = '<span class="chip-dot"></span>' + name + (isBanned?' &#128683;':' &#10003;');
-      chip.onclick = function(){ toggleBan(name); };
+      chip.onclick = function(){ toggleBan(name, chip); };
       container.appendChild(chip);
     });
   });
 }
 
-function toggleBan(name) {
+function toggleBan(name, chip) {
   var isBanned = bannedList.some(function(b){ return b.toLowerCase()===name.toLowerCase(); });
   if (isBanned) {
+    // Unban name and device
     bannedList = bannedList.filter(function(b){ return b.toLowerCase()!==name.toLowerCase(); });
-    saveBanned(name + ' desbloqueado');
+    // Find and remove device
+    db.collection('presence').where('name','==',name).get().then(function(snap){
+      snap.forEach(function(doc){
+        var devId = doc.data().deviceId;
+        if(devId) bannedDevices = bannedDevices.filter(function(d){ return d!==devId; });
+      });
+      saveBanned(name + ' desbloqueado');
+    }).catch(function(){ saveBanned(name + ' desbloqueado'); });
   } else {
+    // Ban name and device
     bannedList.push(name);
-    saveBanned(name + ' bloqueado');
+    // Find device ID from presence
+    db.collection('presence').where('name','==',name).get().then(function(snap){
+      snap.forEach(function(doc){
+        var devId = doc.data().deviceId;
+        if(devId && bannedDevices.indexOf(devId)<0) bannedDevices.push(devId);
+      });
+      saveBanned(name + ' bloqueado (nombre + dispositivo)');
+    }).catch(function(){ saveBanned(name + ' bloqueado'); });
   }
 }
 
 function saveBanned(msg) {
-  db.collection('config').doc('banned').set({names: bannedList})
+  db.collection('config').doc('banned').set({names: bannedList, devices: bannedDevices})
     .then(function(){ showToast(msg); renderUsers(); })
     .catch(function(e){ showToast('Error: ' + e.message); });
 }

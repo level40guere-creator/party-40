@@ -281,6 +281,9 @@ var FC={
 firebase.initializeApp(FC);
 var db=firebase.firestore();
 var pid='', sf=[], media=[], ssTimer=null, ssIdx=0, unsub=null;
+// Device fingerprint - generated once per device
+var deviceId = localStorage.getItem('partyDeviceId');
+if(!deviceId){ deviceId = 'dev_' + Math.random().toString(36).substr(2,9) + Date.now().toString(36); localStorage.setItem('partyDeviceId', deviceId); }
 var myName = localStorage.getItem('partyUserName') || '';
 
 /* CANVAS BG */
@@ -359,6 +362,7 @@ function doLogin() {
     // Register user presence in Firestore
     db.collection('presence').doc(name).set({
       name: name,
+      deviceId: deviceId,
       online: true,
       lastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }).catch(function(){});
@@ -388,8 +392,10 @@ function startApp() {
   db.collection('config').doc('banned').onSnapshot(function(doc) {
     if(!myName) return;
     var banned = doc.exists ? (doc.data().names||[]) : [];
+    var bannedDevices = doc.exists ? (doc.data().devices||[]) : [];
     var isBanned = banned.some(function(b){ return b.toLowerCase()===myName.toLowerCase(); });
-    if(isBanned) {
+    var isDeviceBanned = bannedDevices.indexOf(deviceId) >= 0;
+    if(isBanned || isDeviceBanned) {
       // Mark offline
       db.collection('presence').doc(myName).set({name:myName,online:false,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
       localStorage.removeItem('partyUserName');
@@ -441,14 +447,16 @@ window.onload = function() {
   if(saved) {
     db.collection('config').doc('banned').get().then(function(doc){
       var banned = doc.exists ? (doc.data().names||[]) : [];
+      var bannedDevices = doc.exists ? (doc.data().devices||[]) : [];
       var isBanned = banned.some(function(b){ return b.toLowerCase()===saved.toLowerCase(); });
-      if(isBanned) {
+      var isDeviceBanned = bannedDevices.indexOf(deviceId) >= 0;
+      if(isBanned || isDeviceBanned) {
         localStorage.removeItem('partyUserName');
         document.getElementById('loginScreen').style.display = 'flex';
       } else {
         myName = saved;
         // Register presence
-        db.collection('presence').doc(saved).set({name:saved,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+        db.collection('presence').doc(saved).set({name:saved,deviceId:deviceId,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('bgCanvas').style.display = 'block';
         document.body.classList.remove('locked');
@@ -457,7 +465,7 @@ window.onload = function() {
     }).catch(function(){
       myName = saved;
       // Register presence
-      db.collection('presence').doc(saved).set({name:saved,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      db.collection('presence').doc(saved).set({name:saved,deviceId:deviceId,online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('bgCanvas').style.display = 'block';
       document.body.classList.remove('locked');
