@@ -197,6 +197,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- HEADER -->
   <header class="app-header">
     <div class="header-logo" id="headerLogo">PARTY FOTOS</div>
+    <button onclick="doLogout()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1px;padding:6px 12px;">&#x1F6AA; SALIR</button>
   </header>
 
 
@@ -319,6 +320,22 @@ function animate(){
 
 /* INIT */
 /* ---- LOGIN ---- */
+function doLogout() {
+  if(!confirm("Cerrar sesion?")) return;
+  localStorage.removeItem('partyUserName');
+  myName = '';
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('bgCanvas').style.display = 'none';
+  document.getElementById('loginName').value = '';
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').style.opacity = '.4';
+  document.getElementById('loginBanned').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.body.classList.add('locked');
+  if(unsub){ unsub(); unsub=null; }
+}
+
 function doLogin() {
   var name = document.getElementById('loginName').value.trim();
   if(name.length < 2) return;
