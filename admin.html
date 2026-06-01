@@ -231,7 +231,10 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
       <div id="onlineList" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.5rem;">
         <div style="color:#444;font-size:.7rem;font-family:monospace;">Esperando usuarios...</div>
       </div>
-      <div class="acard-title">TODOS LOS USUARIOS — TOCA PARA BLOQUEAR</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="acard-title" style="margin:0;">TODOS LOS USUARIOS — TOCA PARA BLOQUEAR</div>
+        <button onclick="resetUsers()" style="background:#cc2200;border:none;border-radius:10px;padding:.4rem .8rem;color:#fff;font-family:Syne,sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;">🗑 LIMPIAR TODO</button>
+      </div>
       <div id="usersList" style="display:flex;flex-wrap:wrap;"></div>
     </div>
 
@@ -666,6 +669,43 @@ function updateStats() {
   document.getElementById('sVideos').textContent   = allItems.filter(function(i){return i.type==='video';}).length;
   document.getElementById('sLikes').textContent    = allItems.reduce(function(s,i){return s+(i.likes||0);},0);
   document.getElementById('sComments').textContent = allItems.reduce(function(s,i){return s+(i.comments?i.comments.length:0);},0);
+}
+
+function resetUsers() {
+  showConfirm('Borrar todos los usuarios y desbloquear todo?', function() {
+    var batch = [
+      db.collection('config').doc('presence').delete(),
+      db.collection('config').doc('banned').delete(),
+      db.collection('config').doc('users').delete()
+    ];
+    // Delete all presence docs
+    db.collection('presence').get().then(function(snap) {
+      var dels = snap.docs.map(function(d){ return d.ref.delete(); });
+      return Promise.all(dels);
+    }).then(function() {
+      bannedList = [];
+      bannedDevices = [];
+      registeredUsers = [];
+      renderUsers();
+      showToast('Usuarios limpiados correctamente');
+    }).catch(function(e){ showToast('Error: '+e.message); });
+  });
+}
+
+function showConfirm(msg, onYes) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:2rem;';
+  overlay.innerHTML =
+    '<div style="background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:1.75rem;max-width:320px;width:100%;text-align:center;">' +
+      '<div style="font-size:1rem;font-weight:700;margin-bottom:1.5rem;line-height:1.4;">'+msg+'</div>' +
+      '<div style="display:flex;gap:.75rem;">' +
+        '<button id="cNo" style="flex:1;padding:.85rem;border-radius:12px;border:1px solid #333;background:rgba(255,255,255,.07);color:#fff;font-family:Syne,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">CANCELAR</button>' +
+        '<button id="cYes" style="flex:1;padding:.85rem;border-radius:12px;border:none;background:#cc2200;color:#fff;font-family:Syne,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">CONFIRMAR</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('cYes').onclick = function(){ document.body.removeChild(overlay); onYes(); };
+  document.getElementById('cNo').onclick  = function(){ document.body.removeChild(overlay); };
 }
 
 function showToast(msg) {
