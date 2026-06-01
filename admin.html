@@ -532,8 +532,10 @@ function renderUsers() {
       chip.className = 'user-chip' + (isBanned?' banned':'');
       var devId = null;
       // Find device ID for this user from presence
-      chip.innerHTML = '<span class="chip-dot"></span>' + name + (isBanned?' &#128683;':' &#10003;');
-      chip.onclick = function(){ toggleBan(name, chip); };
+      chip.innerHTML = 
+        '<span class="chip-dot"></span>' + 
+        '<span onclick="toggleBan(''+name+'', this.parentElement)" style="cursor:pointer;">' + name + (isBanned?' &#128683;':' &#10003;') + '</span>' +
+        '<span onclick="removeUser(''+name+'')" style="margin-left:6px;opacity:.5;font-size:.75rem;cursor:pointer;" title="Eliminar de la lista">&#10005;</span>';
       container.appendChild(chip);
     });
   });
@@ -669,6 +671,19 @@ function updateStats() {
   document.getElementById('sVideos').textContent   = allItems.filter(function(i){return i.type==='video';}).length;
   document.getElementById('sLikes').textContent    = allItems.reduce(function(s,i){return s+(i.likes||0);},0);
   document.getElementById('sComments').textContent = allItems.reduce(function(s,i){return s+(i.comments?i.comments.length:0);},0);
+}
+
+function removeUser(name) {
+  // Remove from presence
+  db.collection('presence').doc(name).delete().catch(function(){});
+  // Remove from users list
+  registeredUsers = registeredUsers.filter(function(n){ return n !== name; });
+  db.collection('config').doc('users').set({names: registeredUsers}).catch(function(){});
+  // Also unban if banned
+  bannedList = bannedList.filter(function(b){ return b.toLowerCase() !== name.toLowerCase(); });
+  db.collection('config').doc('banned').set({names: bannedList, devices: bannedDevices}).catch(function(){});
+  showToast(name + ' eliminado de la lista');
+  renderUsers();
 }
 
 function resetUsers() {
