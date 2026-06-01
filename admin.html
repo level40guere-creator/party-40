@@ -120,6 +120,12 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 
 #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:#16162a;border:1px solid var(--border);border-radius:12px;padding:.6rem 1.25rem;font-size:.85rem;z-index:9999;transition:transform .3s;white-space:nowrap;}
 #toast.on{transform:translateX(-50%) translateY(0);}
+
+.user-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s;background:rgba(255,255,255,.07);}
+.user-chip:hover{border-color:rgba(255,255,255,.3);}
+.user-chip.banned{background:rgba(255,50,50,.15);border-color:#ff3333;color:#ff6666;}
+.user-chip .chip-dot{width:8px;height:8px;border-radius:50%;background:#00ff88;}
+.user-chip.banned .chip-dot{background:#ff3333;}
 </style>
 </head>
 <body>
@@ -223,6 +229,16 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
         <div class="stat-box"><div class="stat-num" id="sLikes" style="color:#ff006e">0</div><div class="stat-lbl">LIKES</div></div>
         <div class="stat-box"><div class="stat-num" id="sComments" style="color:#ffe600">0</div><div class="stat-lbl">COMENTARIOS</div></div>
       </div>
+    </div>
+
+
+    <!-- USUARIOS BANEADOS -->
+    <div class="acard full">
+      <div class="gal-toolbar">
+        <div class="gal-toolbar-title">USUARIOS REGISTRADOS</div>
+      </div>
+      <div style="font-family:monospace;font-size:.6rem;color:#444;margin-bottom:.9rem;">Toca un usuario para bloquearlo o desbloquearlo</div>
+      <div id="usersList" style="display:flex;flex-wrap:wrap;gap:.5rem;"></div>
     </div>
 
     <div class="acard full">
@@ -427,7 +443,13 @@ function printQR() {
   '.qrf{background:#fff;border-radius:14px;padding:14px;display:inline-block;margin-bottom:1.75rem;}'+
   '.cta{font-family:Space Mono,monospace;font-size:.62rem;letter-spacing:3px;color:'+c+';}'+
   '.sub{font-family:Space Mono,monospace;font-size:.52rem;letter-spacing:2px;color:rgba(255,255,255,.35);margin-top:.4rem;}'+
-  '</style></head><body>'+
+  '
+.user-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s;background:rgba(255,255,255,.07);}
+.user-chip:hover{border-color:rgba(255,255,255,.3);}
+.user-chip.banned{background:rgba(255,50,50,.15);border-color:#ff3333;color:#ff6666;}
+.user-chip .chip-dot{width:8px;height:8px;border-radius:50%;background:#00ff88;}
+.user-chip.banned .chip-dot{background:#ff3333;}
+</style></head><body>'+
   '<div class="card">'+
   '<div class="stars">* * *</div>'+
   '<div class="host">CUMPLEANIOS DE '+host.toUpperCase()+'</div>'+
@@ -438,6 +460,52 @@ function printQR() {
   '</div>'+
   '<script>window.onload=function(){window.print();}<\/script></body></html>');
   w.document.close();
+}
+
+
+var bannedList=[];
+
+function loadBanned(){
+  db.collection('config').doc('banned').get().then(function(doc){
+    bannedList=doc.exists?(doc.data().names||[]):[];
+    renderUsers();
+  }).catch(function(){bannedList=[];});
+}
+
+function renderUsers(){
+  // Get unique uploaders from allItems
+  var users={};
+  allItems.forEach(function(item){
+    if(item.uploaderName) users[item.uploaderName]=true;
+  });
+  var container=document.getElementById('usersList');
+  if(!container)return;
+  var names=Object.keys(users);
+  if(!names.length){container.innerHTML='<div style="color:#444;font-size:.7rem;font-family:monospace;">No hay usuarios aun</div>';return;}
+  container.innerHTML='';
+  names.forEach(function(name){
+    var isBanned=bannedList.some(function(b){return b.toLowerCase()===name.toLowerCase();});
+    var chip=document.createElement('div');
+    chip.className='user-chip'+(isBanned?' banned':'');
+    chip.innerHTML='<span class="chip-dot"></span>'+name+(isBanned?' &#128683;':' &#10003;');
+    chip.onclick=function(){toggleBan(name);};
+    container.appendChild(chip);
+  });
+}
+
+function toggleBan(name){
+  var isBanned=bannedList.some(function(b){return b.toLowerCase()===name.toLowerCase();});
+  if(isBanned){
+    bannedList=bannedList.filter(function(b){return b.toLowerCase()!==name.toLowerCase();});
+    showToast(name+' desbloqueado');
+  } else {
+    if(!confirm('Bloquear a '+name+'? No podra subir fotos ni comentar.'))return;
+    bannedList.push(name);
+    showToast(name+' bloqueado');
+  }
+  db.collection('config').doc('banned').set({names:bannedList}).then(function(){
+    renderUsers();
+  });
 }
 
 function loadGallery() {

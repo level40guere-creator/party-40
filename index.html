@@ -174,6 +174,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 <canvas id="bgCanvas"></canvas>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;position:relative;z-index:10;background:#000;">
+  <div style="width:100%;max-width:400px;background:#111;border:1px solid #222;border-radius:24px;padding:2rem 1.5rem;text-align:center;">
+    <div style="font-size:2.5rem;font-weight:800;letter-spacing:-2px;margin-bottom:.25rem;font-family:-apple-system,sans-serif;">PARTY<span style="color:var(--accent);">FOTOS</span></div>
+    <div style="font-size:13px;color:#555;margin-bottom:2rem;letter-spacing:2px;">INGRESA TU NOMBRE PARA CONTINUAR</div>
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+      <input id="loginName" style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;width:100%;font-family:inherit;" placeholder="Tu nombre y apellido..." maxlength="30" oninput="document.getElementById('loginBtn').disabled=this.value.trim().length<2;document.getElementById('loginBtn').style.opacity=this.value.trim().length>=2?'1':'.4'"/>
+      <div id="loginBanned" style="color:#ff4444;font-size:13px;display:none;padding:8px;background:rgba(255,0,0,.08);border-radius:8px;">&#128683; Tu acceso ha sido bloqueado por el administrador.</div>
+      <button id="loginBtn" onclick="doLogin()" disabled style="background:var(--accent);border:none;border-radius:12px;padding:14px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;opacity:.4;transition:all .3s;box-shadow:0 0 20px var(--glow);">ENTRAR A LA FIESTA &#9889;</button>
+    </div>
+  </div>
+</div>
+
 <div id="loadingScreen">
   <div class="load-logo">PARTY<br><span>FOTOS</span></div>
   <div class="load-dots"><div class="load-dot"></div><div class="load-dot"></div><div class="load-dot"></div></div>
@@ -307,7 +320,6 @@ function animate(){
 /* INIT */
 window.onload = function() {
   initBeams();initPtcls();initCrowd();animate();
-  if(myName) document.getElementById('un').value = myName;
   db.collection('config').doc('party').get().then(function(doc) {
     if(doc.exists) {
       var d = doc.data();
