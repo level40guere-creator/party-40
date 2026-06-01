@@ -356,6 +356,11 @@ function doLogin() {
     // If banned doc doesn't exist, just let them in
     myName = name;
     localStorage.setItem('partyUserName', name);
+    // Register user in Firestore
+    db.collection('config').doc('users').get().then(function(doc){
+      var users = doc.exists ? (doc.data().names||[]) : [];
+      if(users.indexOf(name) < 0){ users.push(name); db.collection('config').doc('users').set({names:users}); }
+    }).catch(function(){});
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('bgCanvas').style.display = 'block';
     document.body.classList.remove('locked');

@@ -447,15 +447,29 @@ function printQR() {
 }
 
 /* BANNED USERS */
+var registeredUsers = [];
+
 function loadBanned() {
+  // Load banned list
   db.collection('config').doc('banned').get().then(function(doc) {
     bannedList = doc.exists ? (doc.data().names||[]) : [];
-    renderUsers();
+    // Load registered users
+    db.collection('config').doc('users').get().then(function(udoc) {
+      registeredUsers = udoc.exists ? (udoc.data().names||[]) : [];
+      renderUsers();
+    }).catch(function(){ renderUsers(); });
   }).catch(function(){ bannedList=[]; });
+  // Listen for new users in real time
+  db.collection('config').doc('users').onSnapshot(function(doc){
+    registeredUsers = doc.exists ? (doc.data().names||[]) : [];
+    renderUsers();
+  });
 }
 
 function renderUsers() {
+  // Combine registered users + uploaders
   var users = {};
+  registeredUsers.forEach(function(n){ if(n) users[n]=true; });
   allItems.forEach(function(item){ if(item.uploaderName) users[item.uploaderName]=true; });
   var container = document.getElementById('usersList');
   if (!container) return;
