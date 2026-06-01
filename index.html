@@ -231,12 +231,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
   <div class="up-sheet">
     <div class="up-handle"></div>
     <div class="up-title">Compartir momento</div>
-    <div class="upzone" id="upzone">
-      <input type="file" id="fi" accept="image/*,video/*" multiple onchange="hf(this.files)"/>
-      <div class="up-icon">📸</div>
-      <div class="up-txt">Toca para elegir fotos o videos</div>
-      <div class="up-sub">Fotos · Videos hasta 60 seg</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div class="upzone" style="margin:0;padding:20px 10px;position:relative;">
+        <input type="file" id="fi" accept="image/*,video/*" multiple onchange="hf(this.files)"/>
+        <div class="up-icon">🖼️</div>
+        <div class="up-txt" style="font-size:14px;">Galería</div>
+        <div class="up-sub">Fotos y videos</div>
+      </div>
+      <div class="upzone" style="margin:0;padding:20px 10px;position:relative;" onclick="openCamera()">
+        <div class="up-icon">📷</div>
+        <div class="up-txt" style="font-size:14px;">Cámara</div>
+        <div class="up-sub">Sacar foto ahora</div>
+      </div>
     </div>
+    <!-- Camera input hidden -->
+    <input type="file" id="fiCam" accept="image/*" capture="environment" style="display:none" onchange="hf(this.files)"/>
     <div class="prevs" id="prevs"></div>
     <input class="ni" id="un" placeholder="Tu nombre..." maxlength="25"/>
     <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
@@ -252,6 +261,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f
       <div class="cmt-sheet-title">Comentarios</div>
       <button class="cmt-close" onclick="closeCmts()">✕</button>
     </div>
+    <div id="cmtPhoto" style="width:100%;background:#000;max-height:280px;overflow:hidden;flex-shrink:0;"></div>
     <div class="cmt-list" id="cmtList"></div>
     <div class="cmt-input-bar">
       <div class="cmt-inp-avatar" id="cmtAvatar">?</div>
@@ -404,7 +414,7 @@ function ini(name){return(name||'?')[0].toUpperCase();}
 
 function renderFeed(){
   var feed=document.getElementById('feed');
-  if(!media.length){feed.innerHTML='<div class="empty-feed"><div class="ei">📸</div><p>Se el primero en subir una foto!</p></div>';return;}
+  if(!media.length){feed.innerHTML='<div class="empty-feed"><div class="ei">&#128248;</div><p>Se el primero en subir una foto!</p></div>';return;}
   feed.innerHTML='';
   media.forEach(function(item,idx){
     var lkKey='l_'+pid+'_'+item.id;
@@ -413,43 +423,36 @@ function renderFeed(){
     var cmtCount=comments.length;
     var timeStr=item.createdAt&&item.createdAt.toDate?timeAgo(item.createdAt.toDate()):'ahora';
     var likesN=item.likes||0;
-
-    var post=document.createElement('div');post.className='post';
-
+    var post=document.createElement('div');
+    post.className='post';
     var mediaHtml=item.type==='video'
       ?'<div class="post-media"><video src="'+item.url+'" controls playsinline preload="metadata"></video></div>'
       :'<div class="post-media" onclick="openLB('+idx+')" style="cursor:pointer"><img src="'+item.url+'" loading="lazy"/></div>';
-
-    // Show last 2 comments preview
-    var cmtPreview='';
-    if(comments.length>2)cmtPreview+='<div class="cmts-count" onclick="openCmts(\''+item.id+'\')">Ver los '+comments.length+' comentarios</div>';
-    comments.slice(-2).forEach(function(c){cmtPreview+='<div class="comment-preview-line"><strong>'+esc(c.name)+'</strong>'+esc(c.text)+'</div>';});
-
+    var badge=cmtCount>0?'<span style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;">'+cmtCount+'</span>':'';
+    var likeClass=isLiked?'act-btn liked':'act-btn';
     post.innerHTML=
       '<div class="post-header">'+
         '<div class="post-avatar">'+ini(item.uploaderName)+'</div>'+
         '<div class="post-user"><div class="post-username">'+esc(item.uploaderName||'Anonimo')+'</div><div class="post-time">'+timeStr+'</div></div>'+
-        '<button class="post-more">•••</button>'+
+        '<button class="post-more">...</button>'+
       '</div>'+
       mediaHtml+
       '<div class="post-actions">'+
-        '<button class="act-btn'+(isLiked?' liked':'')+'\" id="lb_'+item.id+'" onclick="toggleLike(\''+item.id+'\',this)">'+
-          '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'+
+        '<button class="'+likeClass+'" id="lb_'+item.id+'" onclick="toggleLike(''+item.id+'',this)">'+
+          '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'+
         '</button>'+
-        '<button class="act-btn" onclick="openCmts(\''+item.id+'\')" title="Comentarios" style="position:relative">'+
-          '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
-          (cmtCount>0?'<span style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">'+cmtCount+'</span>':'')+
+        '<button class="act-btn" onclick="openCmts(''+item.id+'')" style="position:relative">'+
+          '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
+          badge+
         '</button>'+
         '<div class="act-spacer"></div>'+
       '</div>'+
       '<div class="post-likes" id="lc_'+item.id+'">'+likesN+' '+(likesN===1?'like':'likes')+'</div>'+
       '<div class="post-caption"><strong>'+esc(item.uploaderName||'Anonimo')+'</strong></div>'+
-      
-      
       '<div class="comment-bar">'+
         '<div class="cbar-avatar">'+ini(myName)+'</div>'+
-        '<input class="cbar-input" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleSendInline(\'cs_'+item.id+'\',this.value)" onkeydown="if(event.key===\'Enter\')sendInline(\''+item.id+'\',this)"/>'+
-        '<button class="cbar-send" id="cs_'+item.id+'" onclick="sendFromBar(\''+item.id+'\',this)">Publicar</button>'+
+        '<input class="cbar-input" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleSendInline('cs_'+item.id+'',this.value)" onkeydown="if(event.key==='Enter')sendInline(''+item.id+'',this)"/>'+
+        '<button class="cbar-send" id="cs_'+item.id+'" onclick="sendFromBar(''+item.id+'',this)">Publicar</button>'+
       '</div>';
     feed.appendChild(post);
   });
@@ -529,6 +532,10 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},3000);}
 function timeAgo(d){var s=Math.floor((Date.now()-d)/1000);if(s<60)return'hace '+s+'s';if(s<3600)return'hace '+Math.floor(s/60)+'m';if(s<86400)return'hace '+Math.floor(s/3600)+'h';return'hace '+Math.floor(s/86400)+'d';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function openCamera(){
+  document.getElementById('fiCam').click();
+}
 
 var uz=document.getElementById('upzone');
 if(uz){uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('dov');});uz.addEventListener('dragleave',function(){uz.classList.remove('dov');});uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('dov');hf(e.dataTransfer.files);});}
