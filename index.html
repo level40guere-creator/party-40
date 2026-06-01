@@ -56,24 +56,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .hico{background:none;border:none;color:var(--text);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
 .hico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* STORIES ROW — upload bar */
-.stories-row{
-  display:flex;gap:.75rem;padding:.85rem 1rem;
-  overflow-x:auto;border-bottom:1px solid var(--border);
-  background:rgba(7,7,15,.6);
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.stories-row::-webkit-scrollbar{display:none;}
-.story-item{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex-shrink:0;cursor:pointer;}
-.story-ring{
-  width:58px;height:58px;border-radius:50%;
-  background:linear-gradient(45deg,var(--accent),var(--accent2),var(--accent));
-  padding:2.5px;display:flex;align-items:center;justify-content:center;
-}
-.story-ring.add{background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.3);}
-.story-inner{width:100%;height:100%;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;overflow:hidden;}
-.story-label{font-size:.6rem;color:var(--text2);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* UPLOAD MODAL */
 #uploadModal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;}
@@ -202,26 +184,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- HEADER -->
   <header class="app-header">
     <div class="header-logo" id="headerLogo">PARTY FOTOS</div>
-    <div class="header-icons">
-      <button class="hico" onclick="toggleSS()" title="Slideshow">
-        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-      </button>
-      <button class="hico" onclick="openUpload()" title="Subir foto">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      </button>
-    </div>
   </header>
 
-  <!-- STORIES / UPLOAD ROW -->
-  <div class="stories-row">
-    <div class="story-item" onclick="openUpload()">
-      <div class="story-ring add">
-        <div class="story-inner">➕</div>
-      </div>
-      <div class="story-label">Tu foto</div>
-    </div>
-    <div id="storiesContainer"></div>
-  </div>
+
 
   <!-- FEED -->
   <div class="feed" id="feed">
@@ -440,8 +405,7 @@ function loadFeed(){
     .onSnapshot(function(snap){
       media=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
       renderFeed();
-      renderStories();
-    });
+          });
 }
 
 function getInitial(name){return (name||'?')[0].toUpperCase();}
@@ -460,9 +424,7 @@ function renderFeed(){
 
     // Build comments HTML (show last 2)
     var shownComments=comments.slice(-2);
-    var commentsHtml=shownComments.map(function(c){
-      return '<div class="comment-line"><strong>'+esc(c.name)+'</strong>'+esc(c.text)+'</div>';
-    }).join('');
+    
     var moreComments=comments.length>2?'<div class="view-comments" onclick="expandComments(\''+item.id+'\',this)">Ver los '+comments.length+' comentarios</div>':'';
     var allCommentsHtml=comments.map(function(c){
       return '<div class="comment-line"><strong>'+esc(c.name)+'</strong>'+esc(c.text)+'</div>';
@@ -472,6 +434,7 @@ function renderFeed(){
       ? '<div class="post-media"><video src="'+item.url+'" controls playsinline preload="metadata" style="width:100%;max-height:500px;object-fit:contain;background:#000;"></video></div>'
       : '<div class="post-media" onclick="openLB('+idx+')" style="cursor:pointer"><img src="'+item.url+'" loading="lazy"/></div>';
 
+    var cmtBadge=comments.length>0?'<span style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">'+comments.length+'</span>':'';
     post.innerHTML=
       '<div class="post-header">'+
         '<div class="post-avatar">'+getInitial(item.uploaderName)+'</div>'+
@@ -493,32 +456,12 @@ function renderFeed(){
       '</div>'+
       '<div class="post-likes" id="lc_'+item.id+'">'+likesCount+' '+(likesCount===1?'like':'likes')+'</div>'+
       '<div class="post-caption"><strong>'+esc(item.uploaderName||'Anonimo')+'</strong></div>'+
-      '<div class="post-comments" id="cmts_'+item.id+'">'+
-        moreComments+
-        '<div class="comments-body" id="cb_'+item.id+'" data-all=\''+JSON.stringify(allCommentsHtml)+'\'>'+commentsHtml+'</div>'+
-      '</div>'+
-      '<div class="post-comment-bar">'+
-        '<div class="comment-avatar">'+getInitial(myName||'?')+'</div>'+
-        '<input class="comment-input-ig" id="ci_'+item.id+'" placeholder="Agrega un comentario..." maxlength="150" oninput="toggleSendBtn(\'cs_'+item.id+'\',this.value)" onkeydown="if(event.key===\'Enter\')sendComment(\''+item.id+'\',this)"/>'+
-        '<button class="comment-send-ig" id="cs_'+item.id+'" onclick="sendComment(\''+item.id+'\',document.getElementById(\'ci_'+item.id+'\'))">Publicar</button>'+
-      '</div>';
+      '';
     feed.appendChild(post);
   });
 }
 
-function renderStories(){
-  var container=document.getElementById('storiesContainer');
-  container.innerHTML='';
-  var seen={};
-  media.forEach(function(item){
-    if(seen[item.uploaderName]) return;
-    seen[item.uploaderName]=true;
-    var div=document.createElement('div');div.className='story-item';
-    div.innerHTML='<div class="story-ring"><div class="story-inner">'+getInitial(item.uploaderName)+'</div></div>'+
-      '<div class="story-label">'+esc(item.uploaderName||'?')+'</div>';
-    container.appendChild(div);
-  });
-}
+
 
 function expandComments(id, el){
   var cb=document.getElementById('cb_'+id);
