@@ -25,10 +25,10 @@
 [data-theme="minimal"]  {--accent:#ffffff;--accent2:#888;--glow:rgba(255,255,255,.15);--b1:#fff;--b2:#888;--b3:#555;--b4:#333;}
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{overflow-x:hidden;}
+html,body{overflow-x:hidden;} body.locked{overflow:hidden;position:fixed;width:100%;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-#bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:none;}
 
 /* LOADING */
 #loadingScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:10;gap:1rem;}
@@ -175,7 +175,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <canvas id="bgCanvas"></canvas>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;position:relative;z-index:10;background:#000;">
+<div id="loginScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;">
   <div style="width:100%;max-width:400px;background:#111;border:1px solid #222;border-radius:24px;padding:2rem 1.5rem;text-align:center;">
     <div style="font-size:2.5rem;font-weight:800;letter-spacing:-2px;margin-bottom:.25rem;font-family:-apple-system,sans-serif;">PARTY<span style="color:var(--accent);">FOTOS</span></div>
     <div style="font-size:13px;color:#555;margin-bottom:2rem;letter-spacing:2px;">INGRESA TU NOMBRE PARA CONTINUAR</div>
