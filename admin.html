@@ -360,16 +360,27 @@ function loadPresence(){
 
 /* BANNED */
 function loadBanned(){
-  db.collection('config').doc('banned').get().then(function(doc){
-    bannedList=doc.exists?(doc.data().names||[]):[];
-    bannedDevices=doc.exists?(doc.data().devices||[]):[];
-    db.collection('presence').get().then(function(snap){
-      snap.forEach(function(d){if(d.data().name&&registeredUsers.indexOf(d.data().name)<0)registeredUsers.push(d.data().name);});
-      renderUsers();
+  // Load hidden users first
+  db.collection('config').doc('hiddenUsers').get().then(function(hdoc){
+    hiddenUsers=hdoc.exists?(hdoc.data().names||[]):[];
+    db.collection('config').doc('banned').get().then(function(doc){
+      bannedList=doc.exists?(doc.data().names||[]):[];
+      bannedDevices=doc.exists?(doc.data().devices||[]):[];
+      db.collection('presence').get().then(function(snap){
+        snap.forEach(function(d){
+          var n=d.data().name;
+          if(n&&registeredUsers.indexOf(n)<0&&hiddenUsers.indexOf(n)<0) registeredUsers.push(n);
+        });
+        renderUsers();
+      });
     });
   });
+  // Real-time presence updates
   db.collection('presence').onSnapshot(function(snap){
-    snap.forEach(function(d){if(d.data().name&&registeredUsers.indexOf(d.data().name)<0)registeredUsers.push(d.data().name);});
+    snap.forEach(function(d){
+      var n=d.data().name;
+      if(n&&registeredUsers.indexOf(n)<0&&hiddenUsers.indexOf(n)<0) registeredUsers.push(n);
+    });
     renderUsers();
   });
 }
@@ -380,7 +391,7 @@ function renderUsers(){
   allItems.forEach(function(item){if(item.uploaderName)users[item.uploaderName]=true;});
   var container=document.getElementById('usersList');
   if(!container)return;
-  var names=Object.keys(users).filter(function(n){return n&&n.trim();});
+  var names=Object.keys(users).filter(function(n){return n&&n.trim()&&hiddenUsers.indexOf(n)<0;});
   if(!names.length){container.innerHTML='<div style="color:#444;font-size:.7rem;font-family:monospace;">No hay usuarios aun</div>';return;}
   container.innerHTML='';
   names.forEach(function(name){
@@ -432,14 +443,19 @@ function saveBanned(msg){
     .catch(function(e){showToast('Error: '+e.message);});
 }
 
+var hiddenUsers=[];
+
 function removeUser(name){
-  // Remove from registeredUsers and presence
+  // Add to hidden list so they don't reappear
+  if(hiddenUsers.indexOf(name)<0) hiddenUsers.push(name);
+  // Remove from registeredUsers
   registeredUsers=registeredUsers.filter(function(n){return n!==name;});
-  bannedList=bannedList.filter(function(b){return b.toLowerCase()!==name.toLowerCase();});
+  // Delete from presence so they disappear from online too
   db.collection('presence').doc(name).delete().catch(function(){});
-  db.collection('config').doc('banned').set({names:bannedList,devices:bannedDevices}).catch(function(){});
-  showToast(name+' eliminado');
-  renderUsers();
+  // Save hidden list to Firestore
+  db.collection('config').doc('hiddenUsers').set({names:hiddenUsers})
+    .then(function(){showToast(name+' eliminado');renderUsers();})
+    .catch(function(){showToast('Error');});
 }
 
 /* GALLERY */
