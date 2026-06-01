@@ -356,10 +356,11 @@ function doLogin() {
     // If banned doc doesn't exist, just let them in
     myName = name;
     localStorage.setItem('partyUserName', name);
-    // Register user in Firestore
-    db.collection('config').doc('users').get().then(function(doc){
-      var users = doc.exists ? (doc.data().names||[]) : [];
-      if(users.indexOf(name) < 0){ users.push(name); db.collection('config').doc('users').set({names:users}); }
+    // Register user presence in Firestore
+    db.collection('presence').doc(name).set({
+      name: name,
+      online: true,
+      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }).catch(function(){});
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('bgCanvas').style.display = 'block';
@@ -368,10 +369,44 @@ function doLogin() {
   });
 }
 
+function markOffline() {
+  if(myName) {
+    db.collection('presence').doc(myName).set({
+      name: myName, online: false,
+      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(function(){});
+  }
+}
+window.addEventListener('beforeunload', markOffline);
+
 function startApp() {
   initBeams();initPtcls();initCrowd();animate();
   if(document.getElementById('un')) document.getElementById('un').value = myName;
   if(document.getElementById('cmtAvatar')) document.getElementById('cmtAvatar').textContent = myName[0].toUpperCase();
+
+  // Listen for ban in real time — if admin bans this user, kick them out
+  db.collection('config').doc('banned').onSnapshot(function(doc) {
+    if(!myName) return;
+    var banned = doc.exists ? (doc.data().names||[]) : [];
+    var isBanned = banned.some(function(b){ return b.toLowerCase()===myName.toLowerCase(); });
+    if(isBanned) {
+      // Mark offline
+      db.collection('presence').doc(myName).set({name:myName,online:false,lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      localStorage.removeItem('partyUserName');
+      myName = '';
+      if(unsub){unsub();unsub=null;}
+      // Show kicked message then redirect to login
+      document.getElementById('appScreen').style.display='none';
+      document.getElementById('bgCanvas').style.display='none';
+      var kickDiv = document.createElement('div');
+      kickDiv.style.cssText='position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;';
+      kickDiv.innerHTML='<div style="font-size:3rem;margin-bottom:1rem;">&#128683;</div>'+
+        '<div style="font-size:1.5rem;font-weight:800;color:#ff3333;margin-bottom:.5rem;">ACCESO DENEGADO</div>'+
+        '<div style="font-size:.9rem;color:#888;margin-bottom:2rem;">El administrador cerro tu sesion.</div>'+
+        '<button onclick="location.reload()" style="background:#ff3333;border:none;border-radius:12px;padding:.85rem 2rem;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;">VOLVER AL INICIO</button>';
+      document.body.appendChild(kickDiv);
+    }
+  });
   var appShown = false;
   var fallback = setTimeout(function(){ if(!appShown){ appShown=true; showTheApp(); } }, 4000);
   db.collection('config').doc('party').get().then(function(doc) {

@@ -113,6 +113,9 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .ibtn.dl{background:#0066ff;color:#fff;}
 .ibtn.del{background:#cc2200;color:#fff;}
 .empty-gal{text-align:center;padding:2rem;color:#333;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;}
+.online-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-radius:20px;font-size:.8rem;font-weight:700;background:rgba(0,255,136,.12);border:2px solid #00ff88;color:#00ff88;margin:.25rem;}
+.online-chip .pulse{width:8px;height:8px;border-radius:50%;background:#00ff88;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 .sel-info{font-family:'Space Mono',monospace;font-size:.55rem;color:#555;letter-spacing:1px;margin-bottom:.75rem;}
 
 #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:#16162a;border:1px solid var(--border);border-radius:12px;padding:.6rem 1.25rem;font-size:.85rem;z-index:9999;transition:transform .3s;white-space:nowrap;}
@@ -221,8 +224,14 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
     </div>
 
     <div class="acard full">
-      <div class="acard-title">USUARIOS REGISTRADOS</div>
-      <div style="font-family:monospace;font-size:.6rem;color:#444;margin-bottom:.75rem;">Toca un usuario para bloquearlo o desbloquearlo</div>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <div class="acard-title" style="margin:0;">ONLINE AHORA</div>
+        <div id="onlineCount" style="background:#00ff88;color:#000;border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:700;">0</div>
+      </div>
+      <div id="onlineList" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.5rem;">
+        <div style="color:#444;font-size:.7rem;font-family:monospace;">Esperando usuarios...</div>
+      </div>
+      <div class="acard-title">TODOS LOS USUARIOS — TOCA PARA BLOQUEAR</div>
       <div id="usersList" style="display:flex;flex-wrap:wrap;"></div>
     </div>
 
@@ -362,11 +371,13 @@ function loadConfig() {
       livePreview();
       loadGallery();
       loadBanned();
+      loadPresence();
     } else {
       curPid = 'party_'+Date.now();
       db.collection('config').doc('party').set({partyId:curPid,theme:'tomorrow',color:'#b400ff'});
       loadGallery();
       loadBanned();
+      loadPresence();
     }
   }).catch(function(e){ showToast('Error cargando config'); });
 }
@@ -448,6 +459,37 @@ function printQR() {
 
 /* BANNED USERS */
 var registeredUsers = [];
+
+function loadPresence() {
+  db.collection('presence').onSnapshot(function(snap) {
+    var online = [];
+    var cutoff = Date.now() - 5 * 60 * 1000; // 5 min
+    snap.forEach(function(doc) {
+      var d = doc.data();
+      if (d.online) {
+        online.push(d.name);
+      }
+    });
+    // Update online count
+    var countEl = document.getElementById('onlineCount');
+    if (countEl) countEl.textContent = online.length;
+    // Update online list
+    var listEl = document.getElementById('onlineList');
+    if (listEl) {
+      if (!online.length) {
+        listEl.innerHTML = '<div style="color:#444;font-size:.7rem;font-family:monospace;">Nadie online aun</div>';
+      } else {
+        listEl.innerHTML = '';
+        online.forEach(function(name) {
+          var chip = document.createElement('div');
+          chip.className = 'online-chip';
+          chip.innerHTML = '<span class="pulse"></span>' + name;
+          listEl.appendChild(chip);
+        });
+      }
+    }
+  });
+}
 
 function loadBanned() {
   // Load banned list
