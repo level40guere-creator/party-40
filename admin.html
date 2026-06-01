@@ -127,6 +127,24 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .user-chip .chip-dot{width:8px;height:8px;border-radius:50%;background:#00ff88;}
 .user-chip.banned .chip-dot{background:#ff3333;}
 </style>
+<script>
+function doLogin() {
+  var email = document.getElementById('lemail').value.trim();
+  var pass  = document.getElementById('lpass').value;
+  var errEl = document.getElementById('lerr');
+  var btn   = document.querySelector('.lb');
+  if(!email || !pass) { errEl.textContent='Completa email y contrasena'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  btn.textContent = 'INGRESANDO...'; btn.disabled = true;
+  firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(function(){ btn.textContent='INGRESAR'; btn.disabled=false; })
+    .catch(function(e) {
+      errEl.textContent = 'Email o contrasena incorrectos';
+      errEl.style.display = 'block';
+      btn.textContent = 'INGRESAR'; btn.disabled = false;
+    });
+}
+</script>
 </head>
 <body>
 
@@ -457,7 +475,25 @@ function printQR() {
 .user-chip.banned{background:rgba(255,50,50,.15);border-color:#ff3333;color:#ff6666;}
 .user-chip .chip-dot{width:8px;height:8px;border-radius:50%;background:#00ff88;}
 .user-chip.banned .chip-dot{background:#ff3333;}
-</style></head><body>'+
+</style><script>
+function doLogin() {
+  var email = document.getElementById('lemail').value.trim();
+  var pass  = document.getElementById('lpass').value;
+  var errEl = document.getElementById('lerr');
+  var btn   = document.querySelector('.lb');
+  if(!email || !pass) { errEl.textContent='Completa email y contrasena'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  btn.textContent = 'INGRESANDO...'; btn.disabled = true;
+  firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(function(){ btn.textContent='INGRESAR'; btn.disabled=false; })
+    .catch(function(e) {
+      errEl.textContent = 'Email o contrasena incorrectos';
+      errEl.style.display = 'block';
+      btn.textContent = 'INGRESAR'; btn.disabled = false;
+    });
+}
+</script>
+</head><body>'+
   '<div class="card">'+
   '<div class="stars">* * *</div>'+
   '<div class="host">CUMPLEANIOS DE '+host.toUpperCase()+'</div>'+
