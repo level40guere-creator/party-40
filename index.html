@@ -318,8 +318,40 @@ function animate(){
 }
 
 /* INIT */
-window.onload = function() {
+/* ---- LOGIN ---- */
+function doLogin() {
+  var name = document.getElementById('loginName').value.trim();
+  if(name.length < 2) return;
+  db.collection('config').doc('banned').get().then(function(doc) {
+    var banned = doc.exists ? (doc.data().names || []) : [];
+    var isBanned = banned.some(function(b){ return b.toLowerCase() === name.toLowerCase(); });
+    if(isBanned) {
+      document.getElementById('loginBanned').style.display = 'block';
+      return;
+    }
+    myName = name;
+    localStorage.setItem('partyUserName', name);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('bgCanvas').style.display = 'block';
+    document.body.classList.remove('locked');
+    startApp();
+  }).catch(function(){
+    // If banned doc doesn't exist, just let them in
+    myName = name;
+    localStorage.setItem('partyUserName', name);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('bgCanvas').style.display = 'block';
+    document.body.classList.remove('locked');
+    startApp();
+  });
+}
+
+function startApp() {
   initBeams();initPtcls();initCrowd();animate();
+  if(document.getElementById('un')) document.getElementById('un').value = myName;
+  if(document.getElementById('cmtAvatar')) document.getElementById('cmtAvatar').textContent = myName[0].toUpperCase();
+  var appShown = false;
+  var fallback = setTimeout(function(){ if(!appShown){ appShown=true; showTheApp(); } }, 4000);
   db.collection('config').doc('party').get().then(function(doc) {
     if(doc.exists) {
       var d = doc.data();
@@ -328,24 +360,51 @@ window.onload = function() {
       document.documentElement.dataset.theme = theme==='tomorrow' ? '' : theme;
       if(d.color) {
         document.documentElement.style.setProperty('--accent', d.color);
-        var rgb = [180,0,255];try{rgb=hexRgb(d.color);}catch(e){}
+        var rgb=[180,0,255];try{rgb=hexRgb(d.color);}catch(e){}
         document.documentElement.style.setProperty('--glow','rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.45)');
       }
-      var logo = d.name ? d.name.toUpperCase() : 'PARTY FOTOS';
-      document.getElementById('headerLogo').textContent = logo;
+      document.getElementById('headerLogo').textContent = (d.name||'PARTY FOTOS').toUpperCase();
       document.title = d.name || 'Party Fotos';
     }
-    setTimeout(function(){
-      document.getElementById('loadingScreen').style.display='none';
-      document.getElementById('appScreen').style.display='block';
-      if(pid) loadFeed();
-    }, 1000);
+    if(!appShown){ appShown=true; clearTimeout(fallback); setTimeout(showTheApp, 600); }
   }).catch(function(){
-    setTimeout(function(){
-      document.getElementById('loadingScreen').style.display='none';
-      document.getElementById('appScreen').style.display='block';
-    }, 1000);
+    if(!appShown){ appShown=true; clearTimeout(fallback); setTimeout(showTheApp, 600); }
   });
+}
+
+function showTheApp() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  if(pid) loadFeed();
+}
+
+window.onload = function() {
+  document.body.classList.add('locked');
+  var saved = localStorage.getItem('partyUserName');
+  if(saved) {
+    db.collection('config').doc('banned').get().then(function(doc){
+      var banned = doc.exists ? (doc.data().names||[]) : [];
+      var isBanned = banned.some(function(b){ return b.toLowerCase()===saved.toLowerCase(); });
+      if(isBanned) {
+        localStorage.removeItem('partyUserName');
+        document.getElementById('loginScreen').style.display = 'flex';
+      } else {
+        myName = saved;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('bgCanvas').style.display = 'block';
+        document.body.classList.remove('locked');
+        startApp();
+      }
+    }).catch(function(){
+      myName = saved;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('bgCanvas').style.display = 'block';
+      document.body.classList.remove('locked');
+      startApp();
+    });
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
 };
 
 /* UPLOAD MODAL */
